@@ -1,0 +1,58 @@
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "nrotel.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set name for deployment collectors.
+*/}}
+{{- define "nrotel.deploymentName" -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "dep" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- define "nrotel.deploymentNameReceiver" -}}
+{{- printf "%s-%s" (include "nrotel.deploymentName" .) "rec" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- define "nrotel.deploymentNameSampler" -}}
+{{- printf "%s-%s" (include "nrotel.deploymentName" .) "smp" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- define "nrotel.headlessServiceNameSampler" -}}
+{{- printf "%s-%s.%s.%s" (include "nrotel.deploymentNameSampler" .) "collector-headless" .Release.Namespace "svc.cluster.local" | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set name for daemonset collectors.
+*/}}
+{{- define "nrotel.daemonsetName" -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "ds" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set name for statefulset collectors.
+*/}}
+{{- define "nrotel.statefulsetName" -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "sts" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set name for node-exporter service discovery.
+*/}}
+{{- define "nrotel.nodeExporterServiceName" -}}
+{{- if .Values.statefulset.prometheus.nodeExporter.serviceNameRef -}}
+{{- printf "%s" .Values.statefulset.prometheus.nodeExporter.serviceNameRef | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "prometheus-node-exporter" | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set name for kube-state-metrics service discovery.
+*/}}
+{{- define "nrotel.kubeStateMetricsServiceName" -}}
+{{- if .Values.statefulset.prometheus.kubeStateMetrics.serviceNameRef -}}
+{{- printf "%s" .Values.statefulset.prometheus.kubeStateMetrics.serviceNameRef | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "kube-state-metrics" | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}

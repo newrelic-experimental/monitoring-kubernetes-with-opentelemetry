@@ -1,0 +1,597 @@
+{{- if eq .Values.metrics.enabled true -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ include "nrotel.statefulsetName" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+
+  # Mode
+  mode: "statefulset"
+
+  # Number of replicas
+  replicas: 2
+
+  # Service Account
+  serviceAccount: {{ include "nrotel.statefulsetName" . }}
+
+  # Target allocator
+  targetAllocator:
+    enabled: true
+    serviceAccount: {{ include "nrotel.statefulsetName" . }}
+    prometheusCR:
+      enabled: false
+
+  # Ports to expose per service
+  ports:
+    - name: prometheus
+      protocol: TCP
+      port: {{ .Values.statefulset.ports.prometheus.port }}
+      targetPort: {{ .Values.statefulset.ports.prometheus.targetPort }}
+
+  # Image
+  image: "{{ .Values.statefulset.image.repository }}:{{ .Values.statefulset.image.tag }}"
+  imagePullPolicy: {{ .Values.statefulset.image.pullPolicy }}
+
+  # Resources
+  resources:
+    requests:
+      cpu: {{ .Values.statefulset.resources.requests.cpu }}
+      memory: {{ .Values.statefulset.resources.requests.memory }}
+    limits:
+      cpu: {{ .Values.statefulset.resources.limits.cpu }}
+      memory: {{ .Values.statefulset.resources.limits.memory }}
+
+  # Environment variables
+  env:
+    - name: MY_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: MY_POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+  {{- if .Values.global.newrelic.enabled }}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $.Values.global.newrelic.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $teamInfo.licenseKey.secretRef.name }}
+          key: {{ $teamInfo.licenseKey.secretRef.key }}
+      {{- else if $teamInfo.licenseKey.value }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "nrotel.statefulsetName" $ }}-{{ $teamName }}
+          key: licenseKey
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $teamInfo.licenseKey.secretRef.name }}
+          key: {{ $teamInfo.licenseKey.secretRef.key }}
+      {{- else if $teamInfo.licenseKey.value }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "nrotel.statefulsetName" $ }}-{{ $teamName }}
+          key: licenseKey
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  # Otel configuration
+  config: |
+    receivers:
+      prometheus/self:
+        config:
+          scrape_configs:
+            - job_name: 'otelcollector'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 10s
+            {{- end }}
+              static_configs:
+              - targets:
+                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
+            {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  regex: otelcol_exporter_queue_size|otelcol_exporter_queue_capacity|otelcol_processor_dropped_metric_points|otelcol_processor_dropped_spans|otelcol_processor_dropped_log_records|otelcol_exporter_enqueue_failed_metric_points|otelcol_exporter_enqueue_failed_spans|otelcol_exporter_enqueue_failed_log_records|otelcol_receiver_refused_metric_points|otelcol_receiver_refused_spans|otelcol_receiver_refused_log_records|otelcol_exporter_refused_metric_points|otelcol_exporter_refused_spans|otelcol_exporter_refused_log_records
+                  action: keep
+            {{- end }}
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'kubernetes-apiservers'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 90s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+
+              kubernetes_sd_configs:
+                - role: endpoints
+              scheme: https
+              tls_config:
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+                  action: keep
+                  regex: default;kubernetes;https
+              
+              {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  regex: apiserver_request_duration_seconds_.*|apiserver_request_total|workqueue_adds_total|workqueue_depth|apiserver_current_inflight_requests|apiserver_dropped_requests_total
+                  action: keep
+              {{- end }}
+
+            - job_name: 'kubernetes-nodes'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 90s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+              scheme: https
+              tls_config:
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+              kubernetes_sd_configs:
+                - role: node
+
+              relabel_configs:
+                - target_label: __address__
+                  replacement: kubernetes.default.svc:443
+                - source_labels: [__meta_kubernetes_node_name]
+                  regex: (.+)
+                  target_label: __metrics_path__
+                  replacement: /api/v1/nodes/$$1/proxy/metrics
+
+            - job_name: 'kubernetes-nodes-cadvisor'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+              scheme: https
+              tls_config:
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+              kubernetes_sd_configs:
+                - role: node
+
+              relabel_configs:
+                - target_label: __address__
+                  replacement: kubernetes.default.svc:443
+                - source_labels: [__meta_kubernetes_node_name]
+                  regex: (.+)
+                  target_label: __metrics_path__
+                  replacement: /api/v1/nodes/$$1/proxy/metrics/cadvisor
+
+              {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  regex: container_cpu_usage_seconds_total|container_memory_usage_bytes|container_fs_reads_total|container_fs_writes_total|container_network_receive_bytes_total|container_network_transmit_bytes_total
+                  action: keep
+              {{- end }}
+
+            - job_name: 'kubernetes-coredns'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+              honor_labels: true
+
+              kubernetes_sd_configs:
+                - role: endpoints
+
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+                  action: drop
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: (.+?)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: keep
+                  regex: kube-dns
+                - source_labels: [__meta_kubernetes_namespace]
+                  action: replace
+                  target_label: namespace
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: replace
+                  target_label: service
+                - source_labels: [__meta_kubernetes_pod_node_name]
+                  action: replace
+                  target_label: node
+
+              {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  regex: coredns_dns_request_duration_seconds|coredns_dns_requests_total|coredns_dns_responses_total|coredns_panics_total|coredns_cache_hits_total
+                  action: keep
+              {{- end }}
+
+            - job_name: 'kubernetes-node-exporter'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+              honor_labels: true
+
+              kubernetes_sd_configs:
+                - role: endpoints
+
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+                  action: drop
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: (.+?)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: keep
+                  regex: {{ include "nrotel.nodeExporterServiceName" . }}
+                - source_labels: [__meta_kubernetes_namespace]
+                  action: replace
+                  target_label: namespace
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: replace
+                  target_label: service
+                - source_labels: [__meta_kubernetes_pod_node_name]
+                  action: replace
+                  target_label: node
+
+              {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  regex: node_cpu_seconds_total|node_memory_MemTotal_bytes|node_memory_MemFree_bytes|node_memory_Cached_bytes|node_memory_Buffers_bytes|node_filesystem_avail_bytes|node_filesystem_size_bytes
+                  action: keep
+              {{- end }}
+
+            - job_name: 'kubernetes-kube-state-metrics'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+              honor_labels: true
+
+              kubernetes_sd_configs:
+                - role: endpoints
+
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+                  action: drop
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: (.+?)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: keep
+                  regex: {{ include "nrotel.kubeStateMetricsServiceName" . }}
+                - source_labels: [__meta_kubernetes_namespace]
+                  action: replace
+                  target_label: namespace
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: replace
+                  target_label: service
+                - source_labels: [__meta_kubernetes_pod_node_name]
+                  action: replace
+                  target_label: node
+
+              {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  regex: kube_pod_container_status_waiting|kube_pod_status_scheduled_time|kube_daemonset_created|kube_deployment_status_replicas_unavailable|kube_deployment_status_condition|kube_replicaset_status_ready_replicas|kube_statefulset_replicas|kube_pod_start_time|kube_pod_status_reason|kube_pod_container_resource_limits|kube_pod_status_scheduled|kube_pod_container_resource_requests|kube_pod_status_container_ready_time|kube_pod_container_status_terminated|kube_pod_container_status_ready|kube_statefulset_status_replicas_updated|kube_statefulset_status_replicas_ready|kube_daemonset_status_desired_number_scheduled|kube_deployment_status_replicas_ready|kube_pod_container_state_started|kube_statefulset_created|kube_daemonset_status_updated_number_scheduled|kube_statefulset_status_replicas_current|kube_daemonset_status_number_ready|kube_pod_container_status_running|kube_pod_created|kube_pod_container_status_restarts_total|kube_daemonset_status_number_unavailable
+                  action: keep
+              {{- end }}
+
+            - job_name: 'kubernetes-service-endpoints'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+              honor_labels: true
+
+              kubernetes_sd_configs:
+                - role: endpoints
+
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+                  action: drop
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: (.+?)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: drop
+                  regex: kube-dns
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: drop
+                  regex: {{ include "nrotel.nodeExporterServiceName" . }}
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: drop
+                  regex: {{ include "nrotel.kubeStateMetricsServiceName" . }}
+                - source_labels: [__meta_kubernetes_namespace]
+                  action: replace
+                  target_label: namespace
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: replace
+                  target_label: service
+                - source_labels: [__meta_kubernetes_pod_node_name]
+                  action: replace
+                  target_label: node
+
+    processors:
+      cumulativetodelta:
+      k8sattributes:
+        extract:
+          metadata:
+          - k8s.node.name
+          - k8s.namespace.name
+          - k8s.pod.name
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: connection
+      attributes:
+        actions:
+          - key: k8s.cluster.name
+            value: {{ .Values.clusterName }}
+            action: upsert
+      attributes/self:
+        actions:
+          - key: otelcollector.type
+            value: statefulset
+            action: upsert
+          - key: k8s.node.name
+            value: $MY_NODE_NAME
+            action: upsert
+          - key: k8s.namespace.name
+            value: $MY_NAMESPACE_NAME
+            action: upsert
+          - key: k8s.pod.name
+            value: $MY_POD_NAME
+            action: upsert
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        metrics:
+          datapoint:
+          {{ $conditionForNamespace := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForNamespace = printf "attributes[\"namespace\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForNamespace = printf "%s and attributes[\"namespace\"] != \"%s\"" $conditionForNamespace $namespace -}}
+            {{- end -}}
+          {{- end -}}
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+          {{- if eq $teamName "opsteam" }}
+            - '(resource.attributes["service.name"] != "kubernetes-nodes") and (resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
+          {{ else }}
+            - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
+          {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        metrics:
+          datapoint:
+          {{ $conditionForNamespace := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForNamespace = printf "attributes[\"namespace\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForNamespace = printf "%s and attributes[\"namespace\"] != \"%s\"" $conditionForNamespace $namespace -}}
+            {{- end -}}
+          {{- end -}}
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+          {{- if eq $teamName "opsteam" }}
+            - '(resource.attributes["service.name"] != "kubernetes-nodes") and (resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
+          {{ else }}
+            - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
+          {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      memory_limiter:
+         check_interval: 1s
+         limit_percentage: 80
+         spike_limit_percentage: 25
+      batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
+
+    exporters:
+    {{- if .Values.global.newrelic.enabled }}
+      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- else }}
+      {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- end }}
+      logging:
+        # verbosity: detailed
+
+    extensions:
+      memory_ballast:
+        size_in_percentage: 20
+
+    service:
+      extensions:
+        - memory_ballast
+      pipelines:
+        metrics/self:
+          receivers:
+            - prometheus/self
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - attributes/self
+            - memory_limiter
+            - batch
+          exporters:
+            - otlp/opsteam
+            # - logging
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+        metrics/{{ $teamName }}:
+          receivers:
+            - prometheus
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+            - batch
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+        {{- end }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
+        metrics/{{ $teamName }}:
+          receivers:
+            - prometheus
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+            - batch
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+        {{- end }}
+      {{- end }}
+      telemetry:
+        # logs:
+        #   level: DEBUG
+        metrics:
+          address: 0.0.0.0:{{ .Values.statefulset.ports.prometheus.targetPort }}
+{{- end -}}

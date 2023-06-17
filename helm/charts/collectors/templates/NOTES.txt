@@ -1,0 +1,134 @@
+#######################################
+### Enjoy your OTel K8s experience! ###
+#######################################
+{{ if and (not .Values.traces.enabled) (not .Values.logs.enabled) (not .Values.metrics.enabled) -}}
+  {{ fail "ERROR: At least one of the following must be enabled: traces, logs & metrics!" }}
+{{- end -}}
+{{ if not .Values.clusterName -}}
+  {{ fail "ERROR: Cluster name should be defined!" }}
+{{- end -}}
+{{ if .Values.traces.enabled -}}
+  {{- if and (not .Values.global.newrelic.enabled) (not .Values.deployment.newrelic) -}}
+    {{ fail "ERROR [DEPLOYMENT]: You have enabled traces but haven't defined any New Relic account neither in the global section nor in the deployment section to send the data to!" }}
+  {{- end -}}
+  {{- if .Values.global.newrelic.enabled -}}
+    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
+      {{ fail "ERROR [DEPLOYMENT]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- end -}}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [DEPLOYMENT]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [DEPLOYMENT]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [DEPLOYMENT]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- else -}}
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams -}}
+      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
+        {{ fail "ERROR [DEPLOYMENT]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- end -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [DEPLOYMENT]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [DEPLOYMENT]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [DEPLOYMENT]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- end }}
+Traces are enabled. Deployments of OTel collectors are deployed.
+{{- end -}}
+{{ if .Values.logs.enabled -}}
+  {{- if and (not .Values.global.newrelic.enabled) (not .Values.daemonset.newrelic) -}}
+    {{ fail "ERROR [DAEMONSET]: You have enabled logs but haven't defined any New Relic account neither in the global section nor in the daemonset section to send the data to!" }}
+  {{- end -}}
+  {{- if .Values.global.newrelic.enabled -}}
+    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
+      {{ fail "ERROR [DAEMONSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- end -}}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [DAEMONSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [DAEMONSET]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [DAEMONSET]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- else -}}
+    {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams -}}
+      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
+        {{ fail "ERROR [DAEMONSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- end -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [DAEMONSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [DAEMONSET]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [DAEMONSET]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- end }}
+Logs are enabled. Daemonset of OTel collectors are deployed.
+{{- end -}}
+{{ if .Values.metrics.enabled }}
+  {{- if and (not .Values.global.newrelic.enabled) (not .Values.statefulset.newrelic) -}}
+    {{ fail "ERROR [STATEFULSET]: You have enabled metrics but haven't defined any New Relic account neither in the global section nor in the statefulet section to send the data to!" }}
+  {{- end -}}
+  {{- if .Values.global.newrelic.enabled -}}
+    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
+      {{ fail "ERROR [STATEFULSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- end -}}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [STATEFULSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [STATEFULSET]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [STATEFULSET]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- else -}}
+    {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams -}}
+      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
+        {{ fail "ERROR [STATEFULSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- end -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [STATEFULSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [STATEFULSET]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [STATEFULSET]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- end }}
+Metrics are enabled. Statefulset of OTel collectors are deployed.
+{{- end }}
+
+#######################################

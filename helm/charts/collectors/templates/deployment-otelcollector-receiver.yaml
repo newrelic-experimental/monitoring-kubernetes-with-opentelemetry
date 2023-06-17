@@ -1,0 +1,303 @@
+{{- if eq .Values.traces.enabled true -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ include "nrotel.deploymentNameReceiver" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+
+  # Mode
+  mode: "deployment"
+
+  # Service Account
+  serviceAccount: {{ include "nrotel.deploymentName" . }}
+
+  # Ports to expose per service
+  ports:
+    - name: prometheus
+      protocol: TCP
+      port: {{ .Values.deployment.ports.prometheus.port }}
+      targetPort: {{ .Values.deployment.ports.prometheus.targetPort }}
+
+  # Image
+  image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+  imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+
+  # Resources
+  resources:
+    requests:
+      cpu: {{ .Values.deployment.resources.requests.cpu }}
+      memory: {{ .Values.deployment.resources.requests.memory }}
+    limits:
+      cpu: {{ .Values.deployment.resources.limits.cpu }}
+      memory: {{ .Values.deployment.resources.limits.memory }}
+
+  # Environment variables
+  env:
+    - name: MY_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: MY_POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+  {{- if .Values.global.newrelic.enabled }}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $.Values.global.newrelic.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $teamInfo.licenseKey.secretRef.name }}
+          key: {{ $teamInfo.licenseKey.secretRef.key }}
+      {{- else if $teamInfo.licenseKey.value }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
+          key: licenseKey
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $teamInfo.licenseKey.secretRef.name }}
+          key: {{ $teamInfo.licenseKey.secretRef.key }}
+      {{- else if $teamInfo.licenseKey.value }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
+          key: licenseKey
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  # Otel configuration
+  config: |
+    receivers:
+      prometheus/self:
+        config:
+          scrape_configs:
+            - job_name: 'otelcollector'
+            {{- if .Values.deployment.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 10s
+            {{- end }}
+              static_configs:
+              - targets:
+                - 0.0.0.0:{{ .Values.deployment.ports.prometheus.port }}
+            {{- if .Values.deployment.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  separator: ;
+                  regex: otelcol_exporter_queue_size|otelcol_exporter_queue_capacity|otelcol_processor_dropped_metric_points|otelcol_processor_dropped_spans|otelcol_processor_dropped_log_records|otelcol_exporter_enqueue_failed_metric_points|otelcol_exporter_enqueue_failed_spans|otelcol_exporter_enqueue_failed_log_records|otelcol_receiver_refused_metric_points|otelcol_receiver_refused_spans|otelcol_receiver_refused_log_records|otelcol_exporter_refused_metric_points|otelcol_exporter_refused_spans|otelcol_exporter_refused_log_records
+                  replacement: $1
+                  action: keep
+            {{- end }}
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    processors:
+      cumulativetodelta:
+      k8sattributes:
+        extract:
+          metadata:
+          - k8s.node.name
+          - k8s.namespace.name
+          - k8s.pod.name
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: connection
+      attributes:
+        actions:
+          - key: k8s.cluster.name
+            value: {{ .Values.clusterName }}
+            action: upsert
+      attributes/self:
+        actions:
+          - key: otelcollector.type
+            value: deployment-receiver
+            action: upsert
+          - key: k8s.node.name
+            value: $MY_NODE_NAME
+            action: upsert
+          - key: k8s.namespace.name
+            value: $MY_NAMESPACE_NAME
+            action: upsert
+          - key: k8s.pod.name
+            value: $MY_POD_NAME
+            action: upsert
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        metrics:
+          datapoint:
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $conditionForK8sNamespaceName }}'
+          {{- end }}
+        {{- end }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        metrics:
+          datapoint:
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $conditionForK8sNamespaceName }}'
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      memory_limiter:
+         check_interval: 1s
+         limit_percentage: 80
+         spike_limit_percentage: 25
+      batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
+
+    exporters:
+      loadbalancing:
+        protocol:
+          otlp:
+            tls:
+              insecure: true
+        resolver:
+          dns:
+            hostname: "{{ include "nrotel.headlessServiceNameSampler" . }}"
+    {{- if .Values.global.newrelic.enabled }}
+      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- else }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- end }}
+      logging:
+        verbosity: detailed
+
+    extensions:
+      memory_ballast:
+        size_in_percentage: 20
+
+    service:
+      extensions:
+        - memory_ballast
+      pipelines:
+        metrics/self:
+          receivers:
+            - prometheus/self
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - attributes/self
+            - memory_limiter
+            - batch
+          exporters:
+            - otlp/opsteam
+            # - logging
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+        metrics/{{ $teamName }}:
+          receivers:
+            - otlp
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+            - batch
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+        {{- end }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+        metrics/{{ $teamName }}:
+          receivers:
+            - otlp
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+            - batch
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+        {{- end }}
+      {{- end }}
+        traces:
+          receivers:
+            - otlp
+          processors:
+            - memory_limiter
+            - k8sattributes
+            - attributes
+            - batch
+          exporters:
+            - loadbalancing
+            # - logging
+      telemetry:
+        # logs:
+        #   level: DEBUG
+        metrics:
+          address: 0.0.0.0:{{ .Values.deployment.ports.prometheus.targetPort }}
+{{- end -}}

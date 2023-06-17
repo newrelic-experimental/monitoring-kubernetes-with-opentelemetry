@@ -1,0 +1,20 @@
+{{- if eq .Values.traces.enabled true -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "nrotel.deploymentName" . }}
+  {{- if .Values.deployment.clusterRoleBinding.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.deployment.clusterRoleBinding.annotations }}
+    {{- printf "%s: %s" $key (tpl $value $ | quote) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "nrotel.deploymentName" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "nrotel.deploymentName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end -}}
