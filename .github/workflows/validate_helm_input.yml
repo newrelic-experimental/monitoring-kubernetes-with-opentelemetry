@@ -1,0 +1,90 @@
+name: Validate Helm input
+
+on:
+  push:
+    paths:
+      - "helm/**"
+      - "tests/scripts/01_test_helm_inputs.sh"
+  pull_request:
+    paths:
+      - "helm/**"
+      - "tests/scripts/01_test_helm_inputs.sh"
+
+jobs:
+  validate-helm-input:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        cases:
+          - name: Cluster name should be defined
+            id: 01
+          - name: At least 1 telemetry type should be enabled
+            id: 02
+          - name: New Relic account should be defined - Deployment
+            id: 03
+          - name: New Relic account should be defined - Daemonset
+            id: 04
+          - name: New Relic account should be defined - Statefulset
+            id: 05
+          - name: OTLP endpoint should be valid (global) - Deployment
+            id: 06
+          - name: OTLP endpoint should be valid (global) - Daemonset
+            id: 07
+          - name: OTLP endpoint should be valid (global) - Statefulset
+            id: 08
+          - name: OTLP endpoint should be valid (individual) - Deployment
+            id: 09
+          - name: OTLP endpoint should be valid (individual) - Daemonset
+            id: 10
+          - name: OTLP endpoint should be valid (individual) - Statefulset
+            id: 11
+          - name: License key should be defined (global) - Deployment
+            id: 12
+          - name: License key should be defined (global) - Daemonset
+            id: 13
+          - name: License key should be defined (global) - Statefulset
+            id: 14
+          - name: License key should be defined (individual) - Deployment
+            id: 15
+          - name: License key should be defined (individual) - Daemonset
+            id: 16
+          - name: License key should be defined (individual) - Statefulset
+            id: 17
+          - name: Referenced license key should have a name (global) - Deployment
+            id: 18
+          - name: Referenced license key should have a name (global) - Daemonset
+            id: 19
+          - name: Referenced license key should have a name (global) - Statefulset
+            id: 20
+          - name: Referenced license key should have a name (individual) - Deployment
+            id: 21
+          - name: Referenced license key should have a name (individual) - Daemonset
+            id: 22
+          - name: Referenced license key should have a name (individual) - Statefulset
+            id: 23
+          - name: Referenced license key should have a key (global) - Deployment
+            id: 24
+          - name: Referenced license key should have a key (global) - Daemonset
+            id: 25
+          - name: Referenced license key should have a key (global) - Statefulset
+            id: 26
+          - name: Referenced license key should have a key (individual) - Deployment
+            id: 27
+          - name: Referenced license key should have a key (individual) - Daemonset
+            id: 28
+          - name: Referenced license key should have a key (individual) - Statefulset
+            id: 29
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: "v3.11.1"
+
+      - name: ${{ matrix.cases.name }}
+        shell: bash
+        run: ./tests/scripts/01_test_helm_inputs.sh --case ${{ matrix.cases.id }}
