@@ -1,0 +1,12 @@
+#####################################################
+#
+# List of approvers for Monitoring Kubernetes with Open Telemetry
+#
+#####################################################
+#
+# Learn about CODEOWNERS file format:
+#  https://help.github.com/en/articles/about-code-owners
+#
+
+# Global owners, will be the owners for everything in the repo.
+* @utr1903
