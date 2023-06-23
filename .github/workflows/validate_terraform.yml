@@ -1,0 +1,39 @@
+name: Validate Terraform
+
+on:
+  push:
+    paths:
+      - "monitoring/terraform/**"
+  pull_request:
+    paths:
+      - "monitoring/terraform/**"
+
+jobs:
+  validate-terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Initialize Terraform
+        run: terraform -chdir=./monitoring/terraform init
+
+      - name: Format Terraform
+        run: terraform -chdir=./monitoring/terraform fmt -check
+
+      - name: Plan Terraform
+        run: |
+          terraform -chdir=./monitoring/terraform plan \
+            -var NEW_RELIC_ACCOUNT_ID=${{ secrets.newrelic_account_id }} \
+            -var NEW_RELIC_API_KEY=${{ secrets.newrelic_api_key }} \
+            -var NEW_RELIC_REGION=${{ secrets.newrelic_region }} \
+            -var cluster_name="nr-otel-k8s"

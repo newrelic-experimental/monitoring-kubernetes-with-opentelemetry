@@ -1,0 +1,528 @@
+### Variables
+
+# Override name
+nameOverride: null
+
+# Cluster name
+clusterName: ""
+
+### Flags ###
+# Logs
+logs:
+  enabled: true
+# Traces
+traces:
+  enabled: true
+# Metrics
+metrics:
+  enabled: true
+
+### GLOBAL CONFIG ###
+# Global config for ease of use to apply to all collector types.
+global:
+
+  # New Relic account configuration
+  newrelic:
+    # Flag to enable global New Relic configuration.
+    # -> If it is enabled, the individual New Relic sections for deployment, daemonset
+    #    and statefulset will be ignored
+    enabled: false
+    # OTLP endpoint for all New Relic accounts
+    # For US accounts -> otlp.nr-data.net:4317
+    # For EU accounts -> otlp.eu01.nr-data.net:4317
+    endpoint: "otlp.nr-data.net:4317"
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
+
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
+
+### DEPLOYMENT CONFIG ###
+# This configuration creates 2 collectors as Kubernetes deployments:
+# - receiver
+# - sampler
+
+## Receiver collector
+# It is responsible for gathering the metrics & spans from all of the applications.
+# Metrics
+# - They will be filtered according to teams and will be exported to each team's
+#   account.
+# Traces
+# - They will be sent to the sampler collector per the loadbalancingexporter
+#   according to the trace IDs.
+
+## Sampler collector
+# It is responsible to:
+# - gather the spans from the receiver collector
+# - sample them
+# - filter & forward them to corresponding New Relic accounts
+
+# Both collectors can be scaled out/in independently from each other
+deployment:
+
+  # Image
+  image:
+    # Repository
+    repository: otel/opentelemetry-collector-contrib
+    # Image pull policy
+    pullPolicy: IfNotPresent
+    # Image tag
+    tag: "0.76.1"
+
+  # Service account
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+
+  clusterRole:
+    # Annotations to add to the clusterRole
+    # Can be used in combination with presets that create a cluster role.
+    annotations: {}
+    # A set of rules as documented here : https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # Can be used in combination with presets that create a cluster role to add additional rules.
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+        verbs:
+          - get
+          - watch
+          - list
+
+  clusterRoleBinding:
+    # Annotations to add to the clusterRoleBinding
+    # Can be used in combination with presets that create a cluster role binding.
+    annotations: {}
+
+  # Array of key value pairs defining the ports for the
+  # collector to expose
+  ports:
+    # Prometheus
+    prometheus:
+      name: prometheus
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+
+  # Resource limits & requests. Update according to your own use case as these values might be too low for a typical deployment.
+  resources:
+    requests:
+      cpu: 32m
+      memory: 128Mi
+    limits:
+      cpu: 256m
+      memory: 512Mi
+
+  # Specific Prometheus configuration
+  prometheus:
+    # Low data mode decreases the scrape frequency of the endpoints
+    lowDataMode: false
+    # Keeps only the most important metrics and drops the rest of the scraped metrics
+    importantMetricsOnly: false
+
+  # New Relic account configuration
+  # -> If the global New Relic configuration is enabled, this section will be ignored
+  newrelic:
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # OTLP endpoint
+        # For US accounts -> otlp.nr-data.net:4317
+        # For EU accounts -> otlp.eu01.nr-data.net:4317
+        endpoint: "otlp.nr-data.net:4317"
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
+
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
+
+### DAEMONSET CONFIG ###
+# This configuration is responsible for collecting the logs from the
+# applications running on the cluster.
+daemonset:
+
+  # Image
+  image:
+    # Repository
+    repository: otel/opentelemetry-collector-contrib
+    # Image pull policy
+    pullPolicy: IfNotPresent
+    # Image tag
+    tag: "0.76.1"
+
+  # Service account
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+
+  clusterRole:
+    # Annotations to add to the clusterRole
+    # Can be used in combination with presets that create a cluster role.
+    annotations: {}
+    # A set of rules as documented here : https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # Can be used in combination with presets that create a cluster role to add additional rules.
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+          - namespaces
+        verbs:
+          - get
+          - watch
+          - list
+
+  clusterRoleBinding:
+    # Annotations to add to the clusterRoleBinding
+    # Can be used in combination with presets that create a cluster role binding.
+    annotations: {}
+
+  # Array of key value pairs defining the ports for the
+  # collector to expose
+  ports:
+    # Prometheus
+    prometheus:
+      name: prometheus
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+
+  # Resource limits & requests. Update according to your own use case as these values might be too low for a typical deployment.
+  resources:
+    requests:
+      cpu: 32m
+      memory: 128Mi
+    limits:
+      cpu: 256m
+      memory: 512Mi
+
+  # Specific Prometheus configuration
+  prometheus:
+    # Low data mode decreases the scrape frequency of the endpoints
+    lowDataMode: false
+    # Keeps only the most important metrics and drops the rest of the scraped metrics
+    importantMetricsOnly: false
+
+  # New Relic account configuration
+  # -> If the global New Relic configuration is enabled, this section will be ignored
+  newrelic:
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # OTLP endpoint
+        # For US accounts -> otlp.nr-data.net:4317
+        # For EU accounts -> otlp.eu01.nr-data.net:4317
+        endpoint: "otlp.nr-data.net:4317"
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
+
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
+
+### STATEFULSET CONFIG ###
+# This configuration is responsible for scraping the metrics from the
+# various endpoints within the cluster.
+statefulset:
+
+  # Image
+  image:
+    # Repository
+    repository: otel/opentelemetry-collector-contrib
+    # Image pull policy
+    pullPolicy: IfNotPresent
+    # Image tag
+    tag: "0.76.1"
+
+  # Amount of replicas
+  replicas: 2
+
+  # Service account
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+
+  clusterRole:
+    # Annotations to add to the clusterRole
+    # Can be used in combination with presets that create a cluster role.
+    annotations: {}
+    # A set of rules as documented here : https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # Can be used in combination with presets that create a cluster role to add additional rules.
+    rules:
+      - apiGroups:
+        - ""
+        resources:
+          - events
+          - namespaces
+          - namespaces/status
+          - nodes
+          - nodes/spec
+          - nodes/stats
+          - nodes/proxy
+          - nodes/metrics
+          - pods
+          - pods/status
+          - replicationcontrollers
+          - replicationcontrollers/status
+          - resourcequotas
+          - services
+          - endpoints
+          - ingresses
+          - configmaps
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+        - apps
+        resources:
+          - daemonsets
+          - deployments
+          - replicasets
+          - statefulsets
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - extensions
+        resources:
+          - daemonsets
+          - deployments
+          - replicasets
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - batch
+        resources:
+          - jobs
+          - cronjobs
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - autoscaling
+        resources:
+          - horizontalpodautoscalers
+        verbs:
+          - get
+          - list
+          - watch
+      - nonResourceURLs:
+          - "/metrics"
+          - "/metrics/cadvisor"
+        verbs:
+          - "get"
+
+  clusterRoleBinding:
+    # Annotations to add to the clusterRoleBinding
+    # Can be used in combination with presets that create a cluster role binding.
+    annotations: {}
+
+  # Array of key value pairs defining the ports for the
+  # collector to expose
+  ports:
+    # Prometheus
+    prometheus:
+      name: prometheus
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+
+  # Resource limits & requests. Update according to your own use case as these values might be too low for a typical deployment.
+  resources:
+    requests:
+      cpu: 32m
+      memory: 128Mi
+    limits:
+      cpu: 256m
+      memory: 512Mi
+
+  # Specific Prometheus configuration
+  prometheus:
+    # Low data mode decreases the scrape frequency of the endpoints
+    lowDataMode: false
+    # Keeps only the most important metrics and drops the rest of the scraped metrics
+    importantMetricsOnly: false
+    # Node exporter specific configuration
+    nodeExporter:
+      # - If you don't have any node-exporter, you can let this chart deploy it as a dependency by setting
+      #   the field "enabled" to true. You can override its values in the DEPENDENCY CONFIG section of this file.
+      # - If you already have a node-exporter on your cluster, you can set the field "enabled" to false and give
+      #   its service name as a reference to the field "serviceNameRef". The collector will scrape that service and
+      #   will not deploy any node-exporter.
+      enabled: true
+      serviceNameRef: null
+    # Kube state metrics specific configuration
+    kubeStateMetrics:
+      # - If you don't have any kube-state-metrics, you can let this chart deploy it as a dependency by setting
+      #   the field "enabled" to true. You can override its values in the DEPENDENCY CONFIG section of this file.
+      # - If you already have a kube-state-metrics on your cluster, you can set the field "enabled" to false and give
+      #   its service name as a reference to the field "serviceNameRef". The collector will scrape that service and
+      #   will not deploy any kube-state-metrics.
+      enabled: true
+      serviceNameRef: null
+
+  # New Relic account configuration
+  # -> If the global New Relic configuration is enabled, this section will be ignored
+  newrelic:
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # OTLP endpoint
+        # For US accounts -> otlp.nr-data.net:4317
+        # For EU accounts -> otlp.eu01.nr-data.net:4317
+        endpoint: "otlp.nr-data.net:4317"
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
+
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
+
+### DEPENDENCY CONFIG ###
+# You can override default values for the dependency helm charts in this section
+
+# Node exporter
+prometheus-node-exporter:
+  # Tolerations override
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+
+# Kube state metrics
+kube-state-metrics:
+  # Auto-sharding for horizontal scalibility
+  autosharding:
+    enabled: true

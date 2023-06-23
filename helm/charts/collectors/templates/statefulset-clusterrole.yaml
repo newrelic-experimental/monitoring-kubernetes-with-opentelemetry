@@ -1,0 +1,16 @@
+{{- if eq .Values.metrics.enabled true -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "nrotel.statefulsetName" . }}
+  {{- if .Values.statefulset.clusterRole.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.statefulset.clusterRole.annotations }}
+    {{- printf "%s: %s" $key (tpl $value $ | quote) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+rules:
+  {{- if .Values.statefulset.clusterRole.rules -}}
+  {{ toYaml .Values.statefulset.clusterRole.rules | nindent 2 -}}
+  {{- end }}
+{{- end -}}
