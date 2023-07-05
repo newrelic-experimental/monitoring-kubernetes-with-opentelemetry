@@ -108,7 +108,7 @@ if [[ $externalNodeExporterAndKubeStateMetrics == "true" ]]; then
 # the kube-state-metrics with the actual chart as dependencies.
 else
   # otelcollector
-  helm dependency build "../charts/collectors"
+  helm dependency update "../charts/collectors"
   helm upgrade ${otelcollectors[name]} \
     --install \
     --wait \
