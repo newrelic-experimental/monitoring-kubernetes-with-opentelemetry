@@ -114,7 +114,7 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod LIKE 'kube-apiserver-%' FACET pod, container TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod LIKE 'kube-apiserver-%' FACET pod, container TIMESERIES AUTO"
       }
     }
 
@@ -170,7 +170,7 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(apiserver_request), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET code TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(apiserver_request_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET code TIMESERIES AUTO"
       }
     }
 
@@ -184,7 +184,7 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(apiserver_request), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET verb TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(apiserver_request_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET verb TIMESERIES AUTO"
       }
     }
 
@@ -198,7 +198,7 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(workqueue_adds), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(workqueue_adds_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO"
       }
     }
 
