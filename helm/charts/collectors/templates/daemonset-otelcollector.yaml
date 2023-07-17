@@ -235,9 +235,9 @@ spec:
           {{ $conditionForK8sNamespaceName := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
-              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+              {{- $conditionForK8sNamespaceName = printf "not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $namespace -}}
             {{ else }}
-              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+              {{- $conditionForK8sNamespaceName = printf "%s and not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $conditionForK8sNamespaceName $namespace -}}
             {{- end -}}
           {{- end -}}
             - '{{ $conditionForK8sNamespaceName }}'
@@ -253,9 +253,9 @@ spec:
           {{ $conditionForK8sNamespaceName := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
-              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+              {{- $conditionForK8sNamespaceName = printf "not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $namespace -}}
             {{ else }}
-              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+              {{- $conditionForK8sNamespaceName = printf "%s and not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $conditionForK8sNamespaceName $namespace -}}
             {{- end -}}
           {{- end -}}
             - '{{ $conditionForK8sNamespaceName }}'
