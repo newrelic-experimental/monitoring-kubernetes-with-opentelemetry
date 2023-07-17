@@ -18,7 +18,7 @@ resource "newrelic_nrql_alert_condition" "otel_collector_cpu_utilization" {
   violation_time_limit_seconds = 86400
 
   nrql {
-    query = "FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container = 'otc-container'), 1 second) / filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu' AND container = 'otc-container') * 100 FACET pod, container"
+    query = "FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds_total), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container = 'otc-container'), 1 second) / filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu' AND container = 'otc-container') * 100 FACET pod, container"
   }
 
   critical {

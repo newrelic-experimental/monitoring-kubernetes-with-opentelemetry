@@ -89,7 +89,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds), WHERE mode != 'idle'), 1 SECONDS)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name LIMIT MAX TIMESERIES"
+        query      = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds_total), WHERE mode != 'idle'), 1 SECONDS)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name LIMIT MAX TIMESERIES"
       }
     }
 
@@ -103,7 +103,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds), WHERE mode != 'idle'), 1 SECONDS)/uniqueCount(cpu)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name LIMIT MAX TIMESERIES"
+        query      = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds_total), WHERE mode != 'idle'), 1 SECONDS)/uniqueCount(cpu)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name LIMIT MAX TIMESERIES"
       }
     }
 
@@ -303,7 +303,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET namespace TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET namespace TIMESERIES AUTO"
       }
     }
 
@@ -317,7 +317,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND kube_pod_container_resource_limits IS NOT NULL AND resource = 'cpu' LIMIT MAX)), 1 second) / filter(sum(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'cpu') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET namespace TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds_total), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND kube_pod_container_resource_limits IS NOT NULL AND resource = 'cpu' LIMIT MAX)), 1 second) / filter(sum(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'cpu') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET namespace TIMESERIES AUTO"
       }
     }
 
@@ -475,7 +475,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET pod, container TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET pod, container TIMESERIES AUTO"
       }
     }
 
@@ -489,7 +489,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND resource = 'cpu' AND service.name = 'kubernetes-kube-state-metrics')), 1 second) / filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'cpu') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET pod, container TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds_total), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND resource = 'cpu' AND service.name = 'kubernetes-kube-state-metrics')), 1 second) / filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'cpu') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL AND namespace IN ({{namespaces}}) FACET pod, container TIMESERIES AUTO"
       }
     }
 

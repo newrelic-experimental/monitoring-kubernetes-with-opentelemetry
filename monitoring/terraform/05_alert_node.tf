@@ -55,7 +55,7 @@ resource "newrelic_nrql_alert_condition" "node_cpu_utilization_high" {
   violation_time_limit_seconds = 86400
 
   nrql {
-    query = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds), WHERE mode != 'idle'), 1 SECONDS)/uniqueCount(cpu)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' FACET k8s.node.name"
+    query = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds_total), WHERE mode != 'idle'), 1 SECONDS)/uniqueCount(cpu)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' FACET k8s.node.name"
   }
 
   critical {
@@ -95,7 +95,7 @@ resource "newrelic_nrql_alert_condition" "node_cpu_utilization_low" {
   violation_time_limit_seconds = 86400
 
   nrql {
-    query = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds), WHERE mode != 'idle'), 1 SECONDS)/uniqueCount(cpu)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' FACET k8s.node.name"
+    query = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds_total), WHERE mode != 'idle'), 1 SECONDS)/uniqueCount(cpu)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' FACET k8s.node.name"
   }
 
   critical {
