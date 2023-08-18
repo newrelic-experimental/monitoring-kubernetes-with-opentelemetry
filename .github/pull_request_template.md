@@ -18,5 +18,6 @@ Provide your changes in bullet points as specific as possible.
 If you have added a complete new feature or changed a major functionality, please update the necessary `README.md` files.
 
 - [Repo](/README.md)
+- [Helm](/helm/README.md)
+  - [Tests](/helm/tests/)
 - [Monitoring](/monitoring/README.md)
-- [Tests](/tests/README.md)
