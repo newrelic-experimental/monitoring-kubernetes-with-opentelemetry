@@ -3,10 +3,12 @@ name: Validate Helm input
 on:
   push:
     paths:
-      - "helm/**"
+      - "helm/charts/**"
+      - "helm/tests/**"
   pull_request:
     paths:
-      - "helm/**"
+      - "helm/charts/**"
+      - "helm/tests/**"
 
 jobs:
   validate-helm-input:
