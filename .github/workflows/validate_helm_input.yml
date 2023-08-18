@@ -3,12 +3,12 @@ name: Validate Helm input
 on:
   push:
     paths:
-      - "helm/**"
-      - "tests/scripts/01_test_helm_inputs.sh"
+      - "helm/charts/**"
+      - "helm/tests/**"
   pull_request:
     paths:
-      - "helm/**"
-      - "tests/scripts/01_test_helm_inputs.sh"
+      - "helm/charts/**"
+      - "helm/tests/**"
 
 jobs:
   validate-helm-input:
@@ -87,4 +87,4 @@ jobs:
 
       - name: ${{ matrix.cases.name }}
         shell: bash
-        run: ./tests/scripts/01_test_helm_inputs.sh --case ${{ matrix.cases.id }}
+        run: ./helm/tests/scripts/01_test_helm_inputs.sh --case ${{ matrix.cases.id }}
