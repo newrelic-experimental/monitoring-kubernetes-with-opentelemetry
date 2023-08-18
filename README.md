@@ -12,7 +12,7 @@ The Helm chart uses Open Telemetry collector Custom Resource Definition (CRD) wh
 
 How does this repository monitor your Kubernetes cluster? What does it supposed to deploy and why? What should be configured and how? All the answers you need, are to be found [here](./helm/README.md)!
 
-Obviously, sending all the telemetry data to New Relic alone doesn't make any sense. It is crucial to comprehend how the data is collected and what attributes are refering to what exactly. That's why, there is a pre-built monitoring stack is waiting for you [here](./monitoring/README.md) which you can easily deploy per Terraform!
+Obviously, sending all the telemetry data to New Relic alone doesn't make any sense. It is crucial to comprehend how the data is collected and what attributes are refering to what exactly. That's why, there is a pre-built monitoring stack waiting for you [here](./monitoring/README.md) which you can easily deploy per Terraform!
 
 ## Support
 

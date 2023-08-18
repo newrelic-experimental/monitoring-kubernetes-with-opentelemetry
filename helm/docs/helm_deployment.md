@@ -2,7 +2,7 @@
 
 Feel free to customize the [Kubernetes manifest files](./helm/charts/collectors/templates/)! You can simply add your OTLP endpoints and license keys according to your New Relic accounts and run the [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh).
 
-The script deploys `node-exporter` and `kube-state-metrics` with the OTel collectors which are **REQUIRED** for a complete monitoring (see [Monitoring](#monitoring) section below).
+The script deploys `node-exporter` and `kube-state-metrics` with the OTel collectors which are **REQUIRED** for a complete monitoring (see [Monitoring](/monitoring/README.md) section).
 
 Moreover, you will need to define a cluster name:
 
@@ -160,7 +160,7 @@ Have full control over your data! Drop whatever you don't need. The Helm chart m
 The Helm chart is already built with 2 flags for this purpose:
 
 - `lowDataMode`: It increases the scrape duration for Prometheus collector instances so that the fetched data is ingested less frequently.
-- `importantMetricsOnly`: It only keeps and forwards the required metrics which are used in the [dashboards](./monitoring/terraform/).
+- `importantMetricsOnly`: It only keeps and forwards the required metrics which are used in the [dashboards](/monitoring/terraform/).
 
 These flags are to be defined per each collecter type: `statefulset`, `deployment`, `daemonset`.
 
