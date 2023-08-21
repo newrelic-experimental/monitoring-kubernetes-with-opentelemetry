@@ -3,23 +3,39 @@
 # Get commandline arguments
 while (( "$#" )); do
   case "$1" in
-    --external)
-      externalNodeExporterAndKubeStateMetrics="true"
+    --cluster-name)
+      clusterName="${2}"
       shift
       ;;
+    --newrelic-region)
+      newrelicRegion="${2}"
+      shift
+      ;;
+    --case)
+      case="${2}"
+      shift
+      ;;    
     *)
       shift
       ;;
   esac
 done
 
-### Set variables
+### Check input
 
-# cluster name
-clusterName="my-dope-cluster"
+# Cluster name
+if [[ $clusterName == "" ]]; then
+  echo "Cluster name is not defined! Use the flag [--cluster-name]."
+  exit 1
+fi
 
 # New Relic OTLP endpoint
-newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
+newrelicOtlpEndpoint="otlp.nr-data.net:4317"
+if [[ $newrelicRegion == "eu" ]]; then
+  newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
+fi
+
+### Set parameters
 
 # nodeexporter
 declare -A nodeexporter
@@ -35,25 +51,69 @@ kubestatemetrics["namespace"]="monitoring"
 
 # otelcollectors
 declare -A otelcollectors
-otelcollectors["name"]="nr-otel"
+otelcollectors["name"]="nrotelk8s"
 otelcollectors["namespace"]="monitoring"
-otelcollectors["deploymentPrometheusPort"]=8888
-otelcollectors["daemonsetPrometheusPort"]=8888
-otelcollectors["statefulsetPrometheusPort"]=8888
 
 ###################
 ### Deploy Helm ###
 ###################
 
-# Repositories
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
+echo "##################"
+echo "### CASE $case ###"
+echo "##################"
 
-# If the flag for "external" is set, deploy the node-exporter and
-# kube-state-metrics separately from the actual chart and reference
-# their services.
-if [[ $externalNodeExporterAndKubeStateMetrics == "true" ]]; then
-  # nodeexporter
+### CASE 01 ###
+# Global configuration enabled: true
+# External NE & KSM dependency: false
+if [[ $case == "1" ]]; then
+
+  # Deploy otelcollectors
+  helm upgrade ${otelcollectors[name]} \
+    --install \
+    --wait \
+    --debug \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set global.newrelic.enabled=true \
+    --set global.newrelic.endpoint=$newrelicOtlpEndpoint \
+    --set global.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    "newrelic-experimental/nrotelk8s"
+fi
+
+### CASE 02 ###
+# Global configuration enabled: false
+# External NE & KSM dependency: false
+if [[ $case == "2" ]]; then
+
+  # Deploy otelcollectors
+  helm upgrade ${otelcollectors[name]} \
+    --install \
+    --wait \
+    --debug \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set global.newrelic.enabled=false \
+    --set deployment.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set deployment.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set daemonset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set daemonset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set statefulset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set statefulset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    "newrelic-experimental/nrotelk8s"
+fi
+
+### CASE 03 ###
+# Global configuration enabled: true
+# External NE & KSM dependency: true
+if [[ $case == "3" ]]; then
+
+  # Add and update Prometheus repositories
+  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  helm repo update prometheus-community
+
+  # Deploy nodeexporter
   helm upgrade ${nodeexporter[name]} \
     --install \
     --wait \
@@ -68,7 +128,7 @@ if [[ $externalNodeExporterAndKubeStateMetrics == "true" ]]; then
     --set tolerations[1].effect="NoSchedule" \
     "prometheus-community/${nodeexporter[remoteChartName]}"
 
-  # kubestatemetrics
+  # Deploy kubestatemetrics
   helm upgrade ${kubestatemetrics[name]} \
     --install \
     --wait \
@@ -78,7 +138,7 @@ if [[ $externalNodeExporterAndKubeStateMetrics == "true" ]]; then
     --set autosharding.enabled=true \
     "prometheus-community/${kubestatemetrics[remoteChartName]}"
 
-  # otelcollector
+  # Deploy otelcollectors
   helm upgrade ${otelcollectors[name]} \
     --install \
     --wait \
@@ -86,29 +146,51 @@ if [[ $externalNodeExporterAndKubeStateMetrics == "true" ]]; then
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=true \
-    --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
-    --set deployment.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set deployment.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
-    --set logs.enabled=true \
-    --set daemonset.ports.prometheus.port=${otelcollectors[daemonsetPrometheusPort]} \
-    --set daemonset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set daemonset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
-    --set metrics.enabled=true \
-    --set statefulset.ports.prometheus.port=${otelcollectors[statefulsetPrometheusPort]} \
+    --set global.newrelic.enabled=true \
+    --set global.newrelic.endpoint=$newrelicOtlpEndpoint \
+    --set global.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
     --set statefulset.prometheus.nodeExporter.enabled=false \
     --set statefulset.prometheus.nodeExporter.serviceNameRef="${nodeexporter[name]}-${nodeexporter[remoteChartName]}" \
     --set statefulset.prometheus.kubeStateMetrics.enabled=false \
     --set statefulset.prometheus.kubeStateMetrics.serviceNameRef="${kubestatemetrics[name]}-${kubestatemetrics[remoteChartName]}" \
-    --set statefulset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set statefulset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
-    "../charts/collectors"
+    "newrelic-experimental/nrotelk8s"
+fi
 
-# If the flag "external" is not set, deploy the node-exporter and
-# the kube-state-metrics with the actual chart as dependencies.
-else
-  # otelcollector
-  helm dependency update "../charts/collectors"
+### CASE 04 ###
+# Global configuration enabled: false
+# External NE & KSM dependency: true
+if [[ $case == "4" ]]; then
+
+  # Add and update Prometheus repositories
+  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  helm repo update prometheus-community
+
+  # Deploy nodeexporter
+  helm upgrade ${nodeexporter[name]} \
+    --install \
+    --wait \
+    --debug \
+    --create-namespace \
+    --namespace ${nodeexporter[namespace]} \
+    --set tolerations[0].key="node-role.kubernetes.io/master" \
+    --set tolerations[0].operator="Exists" \
+    --set tolerations[0].effect="NoSchedule" \
+    --set tolerations[1].key="node-role.kubernetes.io/control-plane" \
+    --set tolerations[1].operator="Exists" \
+    --set tolerations[1].effect="NoSchedule" \
+    "prometheus-community/${nodeexporter[remoteChartName]}"
+
+  # Deploy kubestatemetrics
+  helm upgrade ${kubestatemetrics[name]} \
+    --install \
+    --wait \
+    --debug \
+    --create-namespace \
+    --namespace ${kubestatemetrics[namespace]} \
+    --set autosharding.enabled=true \
+    "prometheus-community/${kubestatemetrics[remoteChartName]}"
+
+  # Deploy otelcollectors
   helm upgrade ${otelcollectors[name]} \
     --install \
     --wait \
@@ -116,17 +198,16 @@ else
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=true \
-    --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
+    --set global.newrelic.enabled=false \
     --set deployment.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
     --set deployment.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
-    --set logs.enabled=true \
-    --set daemonset.ports.prometheus.port=${otelcollectors[daemonsetPrometheusPort]} \
     --set daemonset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
     --set daemonset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
-    --set metrics.enabled=true \
-    --set statefulset.ports.prometheus.port=${otelcollectors[statefulsetPrometheusPort]} \
     --set statefulset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
     --set statefulset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
-    "../charts/collectors"
+    --set statefulset.prometheus.nodeExporter.enabled=false \
+    --set statefulset.prometheus.nodeExporter.serviceNameRef="${nodeexporter[name]}-${nodeexporter[remoteChartName]}" \
+    --set statefulset.prometheus.kubeStateMetrics.enabled=false \
+    --set statefulset.prometheus.kubeStateMetrics.serviceNameRef="${kubestatemetrics[name]}-${kubestatemetrics[remoteChartName]}" \
+    "newrelic-experimental/nrotelk8s"
 fi
