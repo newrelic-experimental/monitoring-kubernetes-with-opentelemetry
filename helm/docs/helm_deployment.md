@@ -214,11 +214,6 @@ helm upgrade ... \
 
 where the default values already enable both of them. You can find the helm dependencies of them [here](/helm/charts/collectors/Chart.yaml).
 
-Moreover, the script [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh) already has both implementations for you.
-
-- If you run it without specifying anything, it will deploy the `node-exporter` and `kube-state-metrics` along with the collectors.
-- if you run it with the flag `--external`, it will first deploy the `node-exporter` and `kube-state-metrics` separately and then deploy the collectors by assigning their service names.
-
 ### Data ingest control
 
 Have full control over your data! Drop whatever you don't need. The Helm chart might cause a significant amount of data ingest when it is deployed with default values. The deployment with values is recommended for the start of the journey (and for troubleshooting) so that you familiarize yourself with all of the metrics and their labels. After you decide which metrics are crucial for you, simply drop the rest.
