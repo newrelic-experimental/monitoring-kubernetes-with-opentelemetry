@@ -1,0 +1,25 @@
+apiVersion: v1
+entries:
+  nrotelk8s:
+  - apiVersion: v2
+    appVersion: 0.81.0
+    created: "2023-08-21T09:37:50.487935+03:00"
+    dependencies:
+    - condition: statefulset.prometheus.nodeExporter.enabled
+      name: prometheus-node-exporter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.17.4
+    - condition: statefulset.prometheus.kubeStateMetrics.enabled
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.7.0
+    description: A Helm chart for Kubernetes
+    digest: 2f7e8937b0238557e4d34c25bb7a02db5e36a4417b7d7e80bf565d529d553e08
+    maintainers:
+    - name: utr1903
+    name: nrotelk8s
+    type: application
+    urls:
+    - nrotelk8s-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-08-21T09:37:50.484008+03:00"
