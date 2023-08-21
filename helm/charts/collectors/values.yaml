@@ -26,7 +26,7 @@ global:
     # Flag to enable global New Relic configuration.
     # -> If it is enabled, the individual New Relic sections for deployment, daemonset
     #    and statefulset will be ignored
-    enabled: false
+    enabled: true
     # OTLP endpoint for all New Relic accounts
     # For US accounts -> otlp.nr-data.net:4317
     # For EU accounts -> otlp.eu01.nr-data.net:4317
