@@ -20,7 +20,7 @@ clusterName="my-dope-cluster"
 
 # otelcollectors
 declare -A otelcollectors
-otelcollectors["name"]="nr-otel"
+otelcollectors["name"]="nrotelk8s"
 otelcollectors["namespace"]="monitoring"
 
 ### Case 01 - Cluster name should be defined
