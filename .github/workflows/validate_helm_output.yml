@@ -33,4 +33,4 @@ jobs:
 
       - name: ${{ matrix.cases.name }}
         shell: bash
-        run: ./helm/tests/scripts/02_test_helm_outputs.sh --case ${{ matrix.cases.id }}
+        run: cd ./helm/tests/scripts && bash 02_test_helm_outputs.sh --case ${{ matrix.cases.id }}
