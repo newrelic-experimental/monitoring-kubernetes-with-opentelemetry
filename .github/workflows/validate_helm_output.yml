@@ -3,12 +3,14 @@ name: Validate Helm output
 on:
   push:
     paths:
+      - ".github/workflows/validate_helm_output.yml"
       - "helm/charts/**"
-      - "helm/tests/**"
+      - "helm/tests/scripts/02_test_helm_outputs.sh"
   pull_request:
     paths:
+      - ".github/workflows/validate_helm_output.yml"
       - "helm/charts/**"
-      - "helm/tests/**"
+      - "helm/tests/scripts/02_test_helm_outputs.sh"
 
 jobs:
   validate-helm-input:
