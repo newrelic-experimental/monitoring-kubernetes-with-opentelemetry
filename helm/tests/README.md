@@ -115,3 +115,25 @@ If the license key of the corresponding New Relic account is defined individuall
 | `deployment` | `27` |
 | `daemonset`  | `28` |
 | `statefulet` | `29` |
+
+## Helm chart outputs
+
+The following tests are implemented to be triggered by the Github workflow on [`validate_helm_output.yaml`](/.github/workflows/validate_helm_output.yml) every pull request in order to check that new commits do not break the expected outcome of the Helm chart.
+
+- There are 2 different cases: `global` & `individual`.
+- There are 3 teams defined in total `opsteam`, `devteam1` & `devteam2`
+  - where `opsteam` does not have any namespace filter.
+  - where `devteam1` has the namespace filter [`devteam1`].
+  - where `devteam2` is tagged to be ignored.
+- All types of collectors are deployed: `daemonset`, `deployment-receiver`, `deployment-sampler` & `statefulset`.
+
+The expected outcome is as follows:
+
+| Operation                                         | `opsteam` | `devteam1` | `devteam2` |
+| ------------------------------------------------- | --------- | ---------- | ---------- |
+| Secret creation                                   | ✅        | ✅         | ❌         |
+| Collector secret environment variables assignment | ✅        | ✅         | ❌         |
+| Collector processors configuration                | ❌        | ✅         | ❌         |
+| Collector exporter configuration                  | ✅        | ✅         | ❌         |
+| Collector pipeline configuration - processor      | ❌        | ✅         | ❌         |
+| Collector pipeline configuration - exporter       | ✅        | ✅         | ❌         |
