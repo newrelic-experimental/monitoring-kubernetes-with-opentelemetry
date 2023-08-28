@@ -48,38 +48,42 @@ spec:
           fieldPath: metadata.namespace
   {{- if .Values.global.newrelic.enabled }}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+      {{- if ne $teamInfo.ignore true }}
     - name: {{ $teamName }}-endpoint
       value: {{ $.Values.global.newrelic.endpoint }}
-      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if $teamInfo.licenseKey.secretRef }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ $teamInfo.licenseKey.secretRef.name }}
           key: {{ $teamInfo.licenseKey.secretRef.key }}
-      {{- else if $teamInfo.licenseKey.value }}
+        {{- else if $teamInfo.licenseKey.value }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
           key: licenseKey
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- else }}
     {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+      {{- if ne $teamInfo.ignore true }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
-      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if $teamInfo.licenseKey.secretRef }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ $teamInfo.licenseKey.secretRef.name }}
           key: {{ $teamInfo.licenseKey.secretRef.key }}
-      {{- else if $teamInfo.licenseKey.value }}
+        {{- else if $teamInfo.licenseKey.value }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
           key: licenseKey
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
@@ -151,7 +155,7 @@ spec:
             action: upsert
       {{- if .Values.global.newrelic.enabled }}
         {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
-          {{- if ne (len $teamInfo.namespaces) 0 }}
+          {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
       filter/{{ $teamName }}:
         error_mode: ignore
         metrics:
@@ -169,7 +173,7 @@ spec:
         {{- end }}
       {{- else }}
         {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
-          {{- if ne (len $teamInfo.namespaces) 0 }}
+          {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
       filter/{{ $teamName }}:
         error_mode: ignore
         metrics:
@@ -206,21 +210,25 @@ spec:
             hostname: "{{ include "nrotel.headlessServiceNameSampler" . }}"
     {{- if .Values.global.newrelic.enabled }}
       {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+        {{- if ne $teamInfo.ignore true }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
         headers:
           api-key: ${env:{{ $teamName }}-licenseKey}
+        {{- end }}
       {{- end }}
     {{- else }}
       {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+        {{- if ne $teamInfo.ignore true }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
         headers:
           api-key: ${env:{{ $teamName }}-licenseKey}
+        {{- end }}
       {{- end }}
     {{- end }}
       logging:
@@ -249,6 +257,7 @@ spec:
             # - logging
       {{- if .Values.global.newrelic.enabled }}
         {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+          {{- if ne $teamInfo.ignore true }}
         metrics/{{ $teamName }}:
           receivers:
             - otlp
@@ -264,9 +273,11 @@ spec:
           exporters:
             - otlp/{{ $teamName }}
             # - logging
+          {{- end }}
         {{- end }}
       {{- else }}
         {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+          {{- if ne $teamInfo.ignore true }}
         metrics/{{ $teamName }}:
           receivers:
             - otlp
@@ -282,6 +293,7 @@ spec:
           exporters:
             - otlp/{{ $teamName }}
             # - logging
+          {{- end }}
         {{- end }}
       {{- end }}
         traces:

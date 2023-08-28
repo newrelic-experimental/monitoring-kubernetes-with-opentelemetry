@@ -68,6 +68,14 @@ global:
       #     value: ""
       #   namespaces:
       #     - devteam2
+      # # Dev team 3 which is responsible for its own apps running
+      # # in a specific namespace but not on this cluster.
+      # devteam3:
+      #   ignore: true
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam3
 
 ### DEPLOYMENT CONFIG ###
 # This configuration creates 2 collectors as Kubernetes deployments:
@@ -199,6 +207,15 @@ deployment:
       #     value: ""
       #   namespaces:
       #     - devteam2
+      # # Dev team 3 which is responsible for its own apps running
+      # # in a specific namespace but not on this cluster.
+      # devteam3:
+      #   ignore: true
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam3
 
 ### DAEMONSET CONFIG ###
 # This configuration is responsible for collecting the logs from the
@@ -313,6 +330,15 @@ daemonset:
       #     value: ""
       #   namespaces:
       #     - devteam2
+      # # Dev team 3 which is responsible for its own apps running
+      # # in a specific namespace but not on this cluster.
+      # devteam3:
+      #   ignore: true
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam3
 
 ### STATEFULSET CONFIG ###
 # This configuration is responsible for scraping the metrics from the
@@ -506,6 +532,15 @@ statefulset:
       #     value: ""
       #   namespaces:
       #     - devteam2
+      # # Dev team 3 which is responsible for its own apps running
+      # # in a specific namespace but not on this cluster.
+      # devteam3:
+      #   ignore: true
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam3
 
 ### DEPENDENCY CONFIG ###
 # You can override default values for the dependency helm charts in this section
