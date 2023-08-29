@@ -13,7 +13,7 @@ on:
       - "helm/tests/scripts/02_test_helm_outputs.sh"
 
 jobs:
-  validate-helm-input:
+  validate-helm-output:
     runs-on: ubuntu-latest
 
     strategy:
