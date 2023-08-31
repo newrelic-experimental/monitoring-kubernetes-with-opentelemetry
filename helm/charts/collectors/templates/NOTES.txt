@@ -8,7 +8,7 @@
   {{ fail "ERROR: Cluster name should be defined!" }}
 {{- end -}}
 {{ if .Values.traces.enabled -}}
-  {{- if and (not .Values.global.newrelic.enabled) (not .Values.deployment.newrelic) -}}
+  {{- if and (not .Values.global.newrelic.enabled) (not .Values.deployment.newrelic.teams) -}}
     {{ fail "ERROR [DEPLOYMENT]: You have enabled traces but haven't defined any New Relic account neither in the global section nor in the deployment section to send the data to!" }}
   {{- end -}}
   {{- if .Values.global.newrelic.enabled -}}
@@ -49,7 +49,7 @@
 Traces are enabled. Deployments of OTel collectors are deployed.
 {{- end -}}
 {{ if .Values.logs.enabled -}}
-  {{- if and (not .Values.global.newrelic.enabled) (not .Values.daemonset.newrelic) -}}
+  {{- if and (not .Values.global.newrelic.enabled) (not .Values.daemonset.newrelic.teams) -}}
     {{ fail "ERROR [DAEMONSET]: You have enabled logs but haven't defined any New Relic account neither in the global section nor in the daemonset section to send the data to!" }}
   {{- end -}}
   {{- if .Values.global.newrelic.enabled -}}
@@ -90,7 +90,7 @@ Traces are enabled. Deployments of OTel collectors are deployed.
 Logs are enabled. Daemonset of OTel collectors are deployed.
 {{- end -}}
 {{ if .Values.metrics.enabled }}
-  {{- if and (not .Values.global.newrelic.enabled) (not .Values.statefulset.newrelic) -}}
+  {{- if and (not .Values.global.newrelic.enabled) (not .Values.statefulset.newrelic.teams) -}}
     {{ fail "ERROR [STATEFULSET]: You have enabled metrics but haven't defined any New Relic account neither in the global section nor in the statefulet section to send the data to!" }}
   {{- end -}}
   {{- if .Values.global.newrelic.enabled -}}
