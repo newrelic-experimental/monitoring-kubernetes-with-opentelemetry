@@ -31,13 +31,16 @@ if [[ $case == "01" ]]; then
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -53,14 +56,17 @@ if [[ $case == "02" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
-      exit 1
-    else
-      echo "Test successful. Error message is captured -> $result"
-    fi
+  echo "$result"
+
+  check=$(echo "$result" | grep "$msg")
+  if [[ $check == "" ]]; then
+    echo "Test failed. Expected error message is not captured."
+    exit 1
+  else
+    echo "Test successful. Expected error message is captured."
+  fi
 fi
 
 ### Case 03, 04, 05 - New Relic account should be defined
@@ -79,13 +85,16 @@ if [[ $case == "03" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -103,13 +112,16 @@ if [[ $case == "04" ]]; then
     --set daemonset.newrelic.teams=null \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -127,13 +139,16 @@ if [[ $case == "05" ]]; then
     --set metrics.enabled=true \
     --set statefulset.newrelic.teams=null \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -153,13 +168,16 @@ if [[ $case == "06" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -177,13 +195,16 @@ if [[ $case == "07" ]]; then
     --set logs.enabled=true \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -201,13 +222,16 @@ if [[ $case == "08" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=true \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -227,13 +251,16 @@ if [[ $case == "09" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -251,13 +278,16 @@ if [[ $case == "10" ]]; then
     --set daemonset.newrelic.teams.opsteam.endpoint="INVALID_ENDPOINT" \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -275,13 +305,16 @@ if [[ $case == "11" ]]; then
     --set metrics.enabled=true \
     --set statefulset.newrelic.teams.opsteam.endpoint="INVALID_ENDPOINT" \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -301,13 +334,16 @@ if [[ $case == "12" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -325,13 +361,16 @@ if [[ $case == "13" ]]; then
     --set logs.enabled=true \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -350,13 +389,16 @@ if [[ $case == "14" ]]; then
     --set metrics.enabled=true \
     --set statefulset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -375,13 +417,16 @@ if [[ $case == "15" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -398,13 +443,16 @@ if [[ $case == "16" ]]; then
     --set daemonset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -421,13 +469,16 @@ if [[ $case == "17" ]]; then
     --set metrics.enabled=true \
     --set statefulset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -448,13 +499,16 @@ if [[ $case == "18" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -473,13 +527,16 @@ if [[ $case == "19" ]]; then
     --set logs.enabled=true \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -498,13 +555,16 @@ if [[ $case == "20" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=true \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -525,13 +585,16 @@ if [[ $case == "21" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -550,13 +613,16 @@ if [[ $case == "22" ]]; then
     --set daemonset.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -575,13 +641,16 @@ if [[ $case == "23" ]]; then
     --set statefulset.newrelic.teams.opsteam.endpoint="otlp.nr-data.net:4317" \
     --set statefulset.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -602,13 +671,16 @@ if [[ $case == "24" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -627,13 +699,16 @@ if [[ $case == "25" ]]; then
     --set logs.enabled=true \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -652,13 +727,16 @@ if [[ $case == "26" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=true \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -679,13 +757,16 @@ if [[ $case == "27" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -704,13 +785,16 @@ if [[ $case == "28" ]]; then
     --set daemonset.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
     --set metrics.enabled=false \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
 
@@ -729,12 +813,15 @@ if [[ $case == "29" ]]; then
     --set statefulset.newrelic.teams.opsteam.endpoint="otlp.nr-data.net:4317" \
     --set statefulset.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
     "../../charts/collectors" \
-    2>&1 | grep "$msg")
+    2>&1)
 
-    if [[ $result == "" ]]; then
-      echo "Failed"
+    echo "$result"
+
+    check=$(echo "$result" | grep "$msg")
+    if [[ $check == "" ]]; then
+      echo "Test failed. Expected error message is not captured."
       exit 1
     else
-      echo "Test successful. Error message is captured -> $result"
+      echo "Test successful. Expected error message is captured."
     fi
 fi
