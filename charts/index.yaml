@@ -3,7 +3,7 @@ entries:
   nrotelk8s:
   - apiVersion: v2
     appVersion: 0.84.0
-    created: "2023-09-05T11:42:41.779783+02:00"
+    created: "2023-09-06T20:57:23.901855+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -14,7 +14,7 @@ entries:
       repository: https://prometheus-community.github.io/helm-charts
       version: 5.7.0
     description: A Helm chart for Kubernetes
-    digest: 604296af4075c8d480a424433740164811b0a1570cd8131446e7beb973e5ca6d
+    digest: 99df6c740c2657d69445adaf007577bc92e3fe1fbd862125992a4058bae81a94
     maintainers:
     - name: utr1903
     name: nrotelk8s
@@ -24,7 +24,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2023-09-05T11:42:41.776375+02:00"
+    created: "2023-09-06T20:57:23.898369+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -45,7 +45,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2023-09-05T11:42:41.773414+02:00"
+    created: "2023-09-06T20:57:23.895691+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -64,4 +64,4 @@ entries:
     urls:
     - nrotelk8s-0.1.0.tgz
     version: 0.1.0
-generated: "2023-09-05T11:42:41.77027+02:00"
+generated: "2023-09-06T20:57:23.892663+02:00"
