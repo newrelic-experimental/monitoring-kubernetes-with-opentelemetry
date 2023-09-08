@@ -178,7 +178,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
       height = 2
       width  = 4
 
-      text = "## Namespace Overview\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n- Node cAdvisor\n- Kube State Metrics"
+      text = "## Namespace Overview\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n-Nodes Endpoints\n- Node cAdvisor\n- Kube State Metrics"
     }
 
     # Namespaces
@@ -364,7 +364,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
       height = 2
       width  = 4
 
-      text = "## Pod Overview\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n- Node cAdvisor\n- Kube State Metrics"
+      text = "## Pod Overview\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n-Nodes Endpoints\n- Node cAdvisor\n- Kube State Metrics"
     }
 
     # Containers
