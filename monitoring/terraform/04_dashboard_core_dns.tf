@@ -30,7 +30,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)' WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN (FROM Metric SELECT uniques(node) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND pod LIKE 'coredns-%') FACET k8s.node.name"
+        query      = "FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)' WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name"
       }
     }
 
@@ -44,7 +44,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT latest(up) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND k8s.node.name IN (FROM Metric SELECT uniques(node) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND pod LIKE 'coredns-%')FACET k8s.node.name TIMESERIES"
+        query      = "FROM Metric SELECT latest(up) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name TIMESERIES"
       }
     }
 
@@ -58,7 +58,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `running` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod LIKE 'coredns-%' AND phase = 'Running' FACET pod LIMIT MAX) SELECT sum(`running`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Running' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'coredns-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
       }
     }
 
@@ -72,7 +72,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `pending` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod LIKE 'coredns-%' AND phase = 'Pending' FACET pod LIMIT MAX) SELECT sum(`pending`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Pending' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'coredns-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
       }
     }
 
@@ -86,7 +86,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `failed` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod LIKE 'coredns-%' AND phase = 'Failed' FACET pod LIMIT MAX) SELECT sum(`failed`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Failed' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'coredns-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
       }
     }
 
@@ -100,7 +100,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `unknown` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod LIKE 'coredns-%' AND phase = 'Unknown' FACET pod LIMIT MAX) SELECT sum(`unknown`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Unknown' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'coredns-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
       }
     }
 
@@ -114,7 +114,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod LIKE 'coredns-%' FACET pod, container TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND k8s.node.name IN ({{nodes}}) AND container IS NOT NULL AND pod LIKE 'coredns-%' FACET pod, container TIMESERIES AUTO"
       }
     }
 
@@ -128,7 +128,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND pod LIKE 'coredns-%' FACET pod, container TIMESERIES AUTO"
+        query      = "FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND k8s.node.name IN ({{nodes}}) AND container IS NOT NULL AND pod IS NOT NULL AND pod LIKE 'coredns-%' FACET pod, container TIMESERIES AUTO"
       }
     }
 
@@ -214,6 +214,22 @@ resource "newrelic_one_dashboard" "core_dns" {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = "FROM Metric SELECT rate(sum(coredns_cache_hits_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-coredns' FACET type TIMESERIES AUTO"
       }
+    }
+  }
+
+  # Nodes
+  variable {
+    name  = "nodes"
+    title = "Nodes"
+    type  = "nrql"
+
+    default_values       = ["*"]
+    replacement_strategy = "default"
+    is_multi_selection   = true
+
+    nrql_query {
+      account_ids = [var.NEW_RELIC_ACCOUNT_ID]
+      query       = "FROM Metric SELECT uniques(k8s.node.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'coredns-%'"
     }
   }
 }
