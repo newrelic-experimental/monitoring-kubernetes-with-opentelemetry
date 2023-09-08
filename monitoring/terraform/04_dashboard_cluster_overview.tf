@@ -590,7 +590,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
     nrql_query {
       account_ids = [var.NEW_RELIC_ACCOUNT_ID]
-      query       = "FROM Metric SELECT uniques(node) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'"
+      query       = "FROM Metric SELECT uniques(node) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' LIMIT MAX"
     }
   }
 
@@ -606,7 +606,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
     nrql_query {
       account_ids = [var.NEW_RELIC_ACCOUNT_ID]
-      query       = "FROM Metric SELECT uniques(namespace) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'"
+      query       = "FROM Metric SELECT uniques(namespace) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' LIMIT MAX"
     }
   }
 }

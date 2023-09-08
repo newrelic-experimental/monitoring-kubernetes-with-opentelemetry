@@ -257,7 +257,7 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
     nrql_query {
       account_ids = [var.NEW_RELIC_ACCOUNT_ID]
-      query       = "FROM Metric SELECT uniques(k8s.node.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%'"
+      query       = "FROM Metric SELECT uniques(k8s.node.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' LIMIT MAX"
     }
   }
 }
