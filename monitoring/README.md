@@ -2,6 +2,8 @@
 
 There is a pre-built [monitoring](#new-relic-resources) for you which you can deploy to your New Relic account per Terraform. But before, it is important to understand how the necessary telemetry data is collected! A detailed explanation of how this solution accomplishes that can be found [here](/monitoring/docs//understanding_prometheus_metrics.md).
 
+Moreover, the solution also provides you with a cost analysis! You can know how much money your individual workloads are costing and how much money you are losing due not utilizing your resources well out-of-the-box! Go check out the [documentation](/monitoring/docs/understanding_cost_analysis.md)!
+
 Regarding to the explanation in the documentation above, the corresponding dashboards and alerts are implemented into a Terraform deployment. In order to deploy that, please refer to this [documentation](/monitoring/docs/terraform_deployment.md).
 
 ## New Relic resources
@@ -84,6 +86,30 @@ The `Terraform` deployment will create the following New Relic resources for you
 
 ![Data Ingest Overview 1](/monitoring/docs/media/data_ingest_overview_1.png)
 ![Data Ingest Overview 2](/monitoring/docs/media/data_ingest_overview_2.png)
+
+[**Cost Analysis - Nodes**](/monitoring/terraform/04_dashboard_cost_analysis.tf)
+
+- Node capacities
+- Node costs
+- Lost money of nodes due to not utilizing them to the fullest
+
+![Cost Analysis - Nodes](/monitoring/docs/media/cost_analysis_nodes.png)
+
+[**Cost Analysis - Namespaces**](/monitoring/terraform/04_dashboard_cost_analysis.tf)
+
+- Namespace costs
+- Lost money of namespaces due to not utilizing them to the fullest
+
+![Cost Analysis - Namespaces 1](/monitoring/docs/media/cost_analysis_namespaces_1.png)
+![Cost Analysis - Namespaces 2](/monitoring/docs/media/cost_analysis_namespaces_2.png)
+
+[**Cost Analysis - Pods**](/monitoring/terraform/04_dashboard_cost_analysis.tf)
+
+- Pod costs
+- Lost money of pods due to not utilizing them to the fullest
+
+![Cost Analysis - Pods 1](/monitoring/docs/media/cost_analysis_pods_1.png)
+![Cost Analysis - Pods 2](/monitoring/docs/media/cost_analysis_pods_2.png)
 
 ### Alerts
 
