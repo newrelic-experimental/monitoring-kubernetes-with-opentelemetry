@@ -30,7 +30,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)' WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name"
+        query      = <<EOF
+        FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)' WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter'
+          AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name
+        EOF
       }
     }
 
@@ -44,7 +48,10 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT latest(up) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT latest(up) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes'
+          AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name TIMESERIES
+        EOF
       }
     }
 
@@ -58,7 +65,15 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Running' FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+          FROM Metric SELECT latest(kube_pod_status_phase) AS `phase`
+            WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics'
+              AND pod IN (
+                FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                  AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX
+              ) AND phase = 'Running' FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -72,7 +87,15 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Pending' FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+          FROM Metric SELECT latest(kube_pod_status_phase) AS `phase`
+            WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics'
+              AND pod IN (
+                FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                  AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX
+              ) AND phase = 'Pending' FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -86,7 +109,15 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Failed' FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+          FROM Metric SELECT latest(kube_pod_status_phase) AS `phase`
+            WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics'
+              AND pod IN (
+                FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                  AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX
+              ) AND phase = 'Failed' FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -100,7 +131,15 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Unknown' FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+          FROM Metric SELECT latest(kube_pod_status_phase) AS `phase`
+            WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics'
+              AND pod IN (
+                FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                  AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX
+              ) AND phase = 'Unknown' FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -114,7 +153,14 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) FACET pod, container TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor'
+            AND container IS NOT NULL AND pod IN (
+              FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX
+            ) FACET pod, container TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -128,7 +174,26 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds_total), WHERE service.name = 'kubernetes-nodes-cadvisor'), 1 second) / filter(max(kube_pod_container_resource_limits), WHERE service.name = 'kubernetes-kube-state-metrics' AND resource = 'cpu') * 100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(pod) WHERE service.name = 'kubernetes-kube-state-metrics' AND kube_pod_container_resource_limits IS NOT NULL AND resource = 'cpu' AND node IN ({{nodes}}) AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND otelcollector.type IN ({{collectortypes}})) LIMIT MAX) FACET pod, container TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT
+          rate(
+            filter(
+              sum(container_cpu_usage_seconds_total), WHERE service.name = 'kubernetes-nodes-cadvisor'
+            ), 1 second
+          )
+          /
+          filter(
+            max(kube_pod_container_resource_limits), WHERE service.name = 'kubernetes-kube-state-metrics' AND resource = 'cpu'
+          ) * 100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND container IS NOT NULL
+            AND pod IN (
+              FROM Metric SELECT uniques(pod) WHERE service.name = 'kubernetes-kube-state-metrics' AND kube_pod_container_resource_limits IS NOT NULL
+                AND resource = 'cpu' AND node IN ({{nodes}})
+                AND pod IN (
+                  FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                    AND service.name = 'otelcollector' AND otelcollector.type IN ({{collectortypes}})
+                ) LIMIT MAX
+            ) FACET pod, container TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -142,7 +207,14 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) FACET pod, container TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL
+          AND pod IN (
+            FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+              AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX
+          ) FACET pod, container TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -156,7 +228,25 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT filter(average(container_memory_usage_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor') / filter(max(kube_pod_container_resource_limits), WHERE service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory') * 100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(pod) WHERE service.name = 'kubernetes-kube-state-metrics' AND kube_pod_container_resource_limits IS NOT NULL AND resource = 'memory' AND node IN ({{nodes}}) AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND otelcollector.type IN ({{collectortypes}})) LIMIT MAX) FACET pod, container TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT
+          filter(
+            average(container_memory_usage_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
+          )
+          /
+          filter(
+            max(kube_pod_container_resource_limits), WHERE service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory'
+          )* 100
+            WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND container IS NOT NULL
+              AND pod IN (
+                FROM Metric SELECT uniques(pod) WHERE service.name = 'kubernetes-kube-state-metrics' AND kube_pod_container_resource_limits IS NOT NULL
+                  AND resource = 'memory' AND node IN ({{nodes}})
+                  AND pod IN (
+                    FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                      AND service.name = 'otelcollector' AND otelcollector.type IN ({{collectortypes}})
+                  ) LIMIT MAX
+              ) FACET pod, container TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -170,7 +260,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT latest(otelcol_exporter_queue_size)/latest(otelcol_exporter_queue_capacity)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT latest(otelcol_exporter_queue_size)/latest(otelcol_exporter_queue_capacity)*100
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -184,7 +278,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT max(otelcol_exporter_queue_size)/max(otelcol_exporter_queue_capacity)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT max(otelcol_exporter_queue_size)/max(otelcol_exporter_queue_capacity)*100
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -198,7 +296,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_processor_dropped_metric_points) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_processor_dropped_metric_points)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -212,7 +314,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_processor_dropped_spans) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_processor_dropped_spans)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -226,7 +332,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_processor_dropped_log_records) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_processor_dropped_log_records)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -240,7 +350,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_exporter_enqueue_failed_metric_points) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_exporter_enqueue_failed_metric_points)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -254,7 +368,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_exporter_enqueue_failed_spans) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_exporter_enqueue_failed_spans)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -268,7 +386,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_exporter_enqueue_failed_log_records) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_exporter_enqueue_failed_log_records)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -282,7 +404,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_receiver_refused_metric_points) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_receiver_refused_metric_points)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -296,7 +422,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_receiver_refused_spans) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_receiver_refused_spans)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -310,7 +440,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_receiver_refused_log_records) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_receiver_refused_log_records)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -324,7 +458,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_exporter_refused_metric_points) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_exporter_refused_metric_points)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -338,7 +476,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_exporter_refused_spans) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_exporter_refused_spans)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -352,7 +494,11 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_exporter_refused_log_records) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT average(otelcol_exporter_refused_log_records)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
+            AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
       }
     }
   }
