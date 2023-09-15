@@ -30,7 +30,11 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)' WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name"
+        query      = <<EOF
+        FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)'
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter'
+            AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name
+        EOF
       }
     }
 
@@ -44,7 +48,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT latest(up) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT latest(up) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-nodes' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name TIMESERIES
+        EOF
       }
     }
 
@@ -58,7 +65,15 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Running' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+          FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry'
+            AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Running'
+              AND pod IN (
+                FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                  AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX
+              ) FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -72,7 +87,15 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Pending' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+          FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry'
+            AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Pending'
+            AND pod IN (
+              FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX
+            ) FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -86,7 +109,15 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Failed' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+  FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry'
+    AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Failed'
+      AND pod IN (
+        FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX
+      ) FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -100,7 +131,15 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Unknown' AND pod IN (FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX) FACET pod LIMIT MAX) SELECT sum(`phase`)"
+        query      = <<EOF
+        FROM (
+          FROM Metric SELECT latest(kube_pod_status_phase) AS `phase` WHERE instrumentation.provider = 'opentelemetry'
+            AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND phase = 'Unknown'
+            AND pod IN (
+              FROM Metric SELECT uniques(pod) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                AND service.name = 'kubernetes-nodes' AND pod LIKE 'kube-apiserver-%' AND k8s.node.name IN ({{nodes}}) LIMIT MAX
+            ) FACET pod LIMIT MAX) SELECT sum(`phase`)
+        EOF
       }
     }
 
@@ -114,7 +153,12 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND k8s.node.name IN ({{nodes}}) AND container IS NOT NULL AND pod LIKE 'kube-apiserver-%' FACET pod, container TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND service.name = 'kubernetes-nodes-cadvisor' AND k8s.node.name IN ({{nodes}}) AND container IS NOT NULL
+            AND pod LIKE 'kube-apiserver-%' FACET pod, container TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -128,7 +172,12 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND k8s.node.name IN ({{nodes}}) AND container IS NOT NULL AND pod IS NOT NULL AND pod LIKE 'kube-apiserver-%' FACET pod, container TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT average(container_memory_usage_bytes)
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND service.name = 'kubernetes-nodes-cadvisor' AND k8s.node.name IN ({{nodes}}) AND container IS NOT NULL
+              AND pod IS NOT NULL AND pod LIKE 'kube-apiserver-%' FACET pod, container TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -142,7 +191,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT histogram(apiserver_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers'"
+        query      = <<EOF
+        FROM Metric SELECT histogram(apiserver_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers'
+        EOF
       }
     }
 
@@ -156,7 +208,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(apiserver_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT average(apiserver_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -170,7 +225,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(apiserver_request_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET code TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT rate(sum(apiserver_request_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET code TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -184,7 +242,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(apiserver_request_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET verb TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT rate(sum(apiserver_request_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET verb TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -198,7 +259,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(workqueue_adds_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT rate(sum(workqueue_adds_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -212,7 +276,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT max(workqueue_depth) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT max(workqueue_depth) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -226,7 +293,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(apiserver_current_inflight_requests), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET request_kind TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT rate(sum(apiserver_current_inflight_requests), 1 minute) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET request_kind TIMESERIES AUTO
+        EOF
       }
     }
 
@@ -240,7 +310,10 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(apiserver_dropped_request), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO"
+        query      = <<EOF
+        FROM Metric SELECT rate(sum(apiserver_dropped_request), 1 minute) WHERE instrumentation.provider = 'opentelemetry'
+          AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO
+        EOF
       }
     }
   }

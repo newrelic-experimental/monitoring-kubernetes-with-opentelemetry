@@ -89,7 +89,13 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name IN ('otelcollector', 'kubernetes-nodes', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-coredns', 'kubernetes-node-exporter', 'kubernetes-kube-state-metrics', 'kubernetes-service-endpoints') FACET service.name"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name IN (
+            'otelcollector', 'kubernetes-nodes', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers',
+            'kubernetes-coredns', 'kubernetes-node-exporter', 'kubernetes-kube-state-metrics', 'kubernetes-service-endpoints'
+          ) FACET service.name
+        EOF
       }
     }
 
@@ -103,7 +109,13 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name IN ('otelcollector', 'kubernetes-nodes', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-coredns', 'kubernetes-node-exporter', 'kubernetes-kube-state-metrics', 'kubernetes-service-endpoints') FACET service.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name IN (
+            'otelcollector', 'kubernetes-nodes', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-coredns',
+            'kubernetes-node-exporter', 'kubernetes-kube-state-metrics', 'kubernetes-service-endpoints'
+          ) FACET service.name TIMESERIES
+        EOF
       }
     }
 
@@ -128,7 +140,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' FACET otelcollector.type"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'otelcollector' FACET otelcollector.type
+        EOF
       }
     }
 
@@ -142,7 +157,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IS NOT NULL AND k8s.pod.name IS NOT NULL FACET otelcollector.type, k8s.pod.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND otelcollector.type IS NOT NULL AND k8s.pod.name IS NOT NULL FACET otelcollector.type, k8s.pod.name TIMESERIES
+        EOF
       }
     }
 
@@ -167,7 +185,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' FACET k8s.namespace.name"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-service-endpoints' FACET k8s.namespace.name
+        EOF
       }
     }
 
@@ -181,17 +202,26 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 AS `Replicaset` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.replicaset.name IS NOT NULL"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 AS `Replicaset` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-service-endpoints' AND k8s.replicaset.name IS NOT NULL
+          EOF
       }
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 AS `Satefulset` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.statefulset.name IS NOT NULL"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 AS `Satefulset` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-service-endpoints' AND k8s.statefulset.name IS NOT NULL
+        EOF
       }
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 AS `Daemonset` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.daemonset.name IS NOT NULL"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 AS `Daemonset` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-service-endpoints' AND k8s.daemonset.name IS NOT NULL
+        EOF
       }
     }
 
@@ -205,7 +235,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' FACET k8s.replicaset.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-service-endpoints' FACET k8s.replicaset.name TIMESERIES
+        EOF
       }
     }
 
@@ -219,7 +252,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' FACET k8s.statefulset.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-service-endpoints' FACET k8s.statefulset.name TIMESERIES
+        EOF
       }
     }
 
@@ -233,7 +269,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' FACET k8s.daemonset.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-service-endpoints' FACET k8s.daemonset.name TIMESERIES
+        EOF
       }
     }
 
@@ -258,7 +297,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' FACET k8s.node.name"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-nodes-cadvisor' FACET k8s.node.name
+        EOF
       }
     }
 
@@ -272,7 +314,10 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' FACET k8s.node.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          AND service.name = 'kubernetes-nodes-cadvisor' FACET k8s.node.name TIMESERIES
+        EOF
       }
     }
 
@@ -297,7 +342,9 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers'"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers'
+        EOF
       }
     }
 
@@ -311,7 +358,9 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES
+        EOF
       }
     }
 
@@ -336,7 +385,9 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' FACET k8s.node.name"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' FACET k8s.node.name
+        EOF
       }
     }
 
@@ -350,7 +401,9 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' FACET k8s.node.name TIMESERIES"
+        query      = <<EOF
+        FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes' FACET k8s.node.name TIMESERIES
+        EOF
       }
     }
   }
