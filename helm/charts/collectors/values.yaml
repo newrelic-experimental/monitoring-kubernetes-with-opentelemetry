@@ -114,6 +114,9 @@ deployment:
     # Annotations to add to the service account
     annotations: {}
 
+  # Security context for container priviliges
+  securityContext: {}
+
   clusterRole:
     # Annotations to add to the clusterRole
     # Can be used in combination with presets that create a cluster role.
@@ -235,6 +238,9 @@ daemonset:
   serviceAccount:
     # Annotations to add to the service account
     annotations: {}
+
+  # Security context for container priviliges
+  securityContext: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
@@ -361,6 +367,9 @@ statefulset:
   serviceAccount:
     # Annotations to add to the service account
     annotations: {}
+
+  # Security context for container priviliges
+  securityContext: {}
 
   clusterRole:
     # Annotations to add to the clusterRole

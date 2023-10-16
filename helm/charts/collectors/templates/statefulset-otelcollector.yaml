@@ -22,6 +22,11 @@ spec:
     prometheusCR:
       enabled: false
 
+  # Security context for container priviliges
+  {{- with .Values.statefulset.securityContext }}
+  securityContext: {{ toYaml . | nindent 4 }}
+  {{- end }}
+
   # Ports to expose per service
   ports:
     - name: prometheus
