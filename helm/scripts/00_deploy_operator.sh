@@ -26,7 +26,7 @@ helm upgrade ${certmanager[name]} \
   --debug \
   --create-namespace \
   --namespace ${certmanager[namespace]} \
-  --version v1.11.0 \
+  --version v1.13.1 \
   --set installCRDs=true \
   "jetstack/cert-manager"
 
@@ -37,4 +37,5 @@ helm upgrade ${oteloperator[name]} \
   --debug \
   --create-namespace \
   --namespace ${oteloperator[namespace]} \
+  --version "0.40.0" \
   "open-telemetry/opentelemetry-operator"
