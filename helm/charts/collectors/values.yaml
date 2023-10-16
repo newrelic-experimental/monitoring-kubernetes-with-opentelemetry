@@ -107,7 +107,7 @@ deployment:
     # Image pull policy
     pullPolicy: IfNotPresent
     # Image tag
-    tag: "0.84.0"
+    tag: "0.86.0"
 
   # Service account
   serviceAccount:
@@ -229,7 +229,7 @@ daemonset:
     # Image pull policy
     pullPolicy: IfNotPresent
     # Image tag
-    tag: "0.84.0"
+    tag: "0.86.0"
 
   # Service account
   serviceAccount:
@@ -352,7 +352,7 @@ statefulset:
     # Image pull policy
     pullPolicy: IfNotPresent
     # Image tag
-    tag: "0.84.0"
+    tag: "0.86.0"
 
   # Amount of replicas
   replicas: 2
