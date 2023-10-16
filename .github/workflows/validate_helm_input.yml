@@ -29,54 +29,72 @@ jobs:
             id: "04"
           - name: New Relic account should be defined - Statefulset
             id: "05"
-          - name: OTLP endpoint should be valid (global) - Deployment
+          - name: New Relic account should be defined - Singleton
             id: "06"
-          - name: OTLP endpoint should be valid (global) - Daemonset
+          - name: OTLP endpoint should be valid (global) - Deployment
             id: "07"
-          - name: OTLP endpoint should be valid (global) - Statefulset
+          - name: OTLP endpoint should be valid (global) - Daemonset
             id: "08"
-          - name: OTLP endpoint should be valid (individual) - Deployment
+          - name: OTLP endpoint should be valid (global) - Statefulset
             id: "09"
-          - name: OTLP endpoint should be valid (individual) - Daemonset
+          - name: OTLP endpoint should be valid (global) - Singleton
             id: "10"
-          - name: OTLP endpoint should be valid (individual) - Statefulset
+          - name: OTLP endpoint should be valid (individual) - Deployment
             id: "11"
-          - name: License key should be defined (global) - Deployment
+          - name: OTLP endpoint should be valid (individual) - Daemonset
             id: "12"
-          - name: License key should be defined (global) - Daemonset
+          - name: OTLP endpoint should be valid (individual) - Statefulset
             id: "13"
-          - name: License key should be defined (global) - Statefulset
+          - name: OTLP endpoint should be valid (individual) - Singleton
             id: "14"
-          - name: License key should be defined (individual) - Deployment
+          - name: License key should be defined (global) - Deployment
             id: "15"
-          - name: License key should be defined (individual) - Daemonset
+          - name: License key should be defined (global) - Daemonset
             id: "16"
-          - name: License key should be defined (individual) - Statefulset
+          - name: License key should be defined (global) - Statefulset
             id: "17"
-          - name: Referenced license key should have a name (global) - Deployment
+          - name: License key should be defined (global) - Singleton
             id: "18"
-          - name: Referenced license key should have a name (global) - Daemonset
+          - name: License key should be defined (individual) - Deployment
             id: "19"
-          - name: Referenced license key should have a name (global) - Statefulset
+          - name: License key should be defined (individual) - Daemonset
             id: "20"
-          - name: Referenced license key should have a name (individual) - Deployment
+          - name: License key should be defined (individual) - Statefulset
             id: "21"
-          - name: Referenced license key should have a name (individual) - Daemonset
+          - name: License key should be defined (individual) - Singleton
             id: "22"
-          - name: Referenced license key should have a name (individual) - Statefulset
+          - name: Referenced license key should have a name (global) - Deployment
             id: "23"
-          - name: Referenced license key should have a key (global) - Deployment
+          - name: Referenced license key should have a name (global) - Daemonset
             id: "24"
-          - name: Referenced license key should have a key (global) - Daemonset
+          - name: Referenced license key should have a name (global) - Statefulset
             id: "25"
-          - name: Referenced license key should have a key (global) - Statefulset
+          - name: Referenced license key should have a name (global) - Singleton
             id: "26"
-          - name: Referenced license key should have a key (individual) - Deployment
+          - name: Referenced license key should have a name (individual) - Deployment
             id: "27"
-          - name: Referenced license key should have a key (individual) - Daemonset
+          - name: Referenced license key should have a name (individual) - Daemonset
             id: "28"
-          - name: Referenced license key should have a key (individual) - Statefulset
+          - name: Referenced license key should have a name (individual) - Statefulset
             id: "29"
+          - name: Referenced license key should have a name (individual) - Singleton
+            id: "30"
+          - name: Referenced license key should have a key (global) - Deployment
+            id: "31"
+          - name: Referenced license key should have a key (global) - Daemonset
+            id: "32"
+          - name: Referenced license key should have a key (global) - Statefulset
+            id: "33"
+          - name: Referenced license key should have a key (global) - Singleton
+            id: "33"
+          - name: Referenced license key should have a key (individual) - Deployment
+            id: "34"
+          - name: Referenced license key should have a key (individual) - Daemonset
+            id: "35"
+          - name: Referenced license key should have a key (individual) - Statefulset
+            id: "36"
+          - name: Referenced license key should have a key (individual) - Singleton
+            id: "36"
 
     steps:
       - name: Checkout

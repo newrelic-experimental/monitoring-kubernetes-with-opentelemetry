@@ -36,6 +36,13 @@ Set name for statefulset collectors.
 {{- end -}}
 
 {{/*
+Set name for singleton collector.
+*/}}
+{{- define "nrotel.singletonName" -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "sng" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Set name for node-exporter service discovery.
 */}}
 {{- define "nrotel.nodeExporterServiceName" -}}

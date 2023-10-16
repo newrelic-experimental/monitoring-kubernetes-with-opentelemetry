@@ -16,6 +16,9 @@ traces:
 # Metrics
 metrics:
   enabled: true
+# Events
+events:
+  enabled: true
 
 ### GLOBAL CONFIG ###
 # Global config for ease of use to apply to all collector types.
@@ -494,6 +497,179 @@ statefulset:
       #   will not deploy any kube-state-metrics.
       enabled: true
       serviceNameRef: null
+
+  # New Relic account configuration
+  # -> If the global New Relic configuration is enabled, this section will be ignored
+  newrelic:
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # OTLP endpoint
+        # For US accounts -> otlp.nr-data.net:4317
+        # For EU accounts -> otlp.eu01.nr-data.net:4317
+        endpoint: "otlp.nr-data.net:4317"
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
+
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
+      # # Dev team 3 which is responsible for its own apps running
+      # # in a specific namespace but not on this cluster.
+      # devteam3:
+      #   ignore: true
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam3
+
+### SINGLETON CONFIG ###
+# This configuration is responsible for scraping the events from the
+# Kube-API-Server.
+singleton:
+
+  # Image
+  image:
+    # Repository
+    repository: otel/opentelemetry-collector-contrib
+    # Image pull policy
+    pullPolicy: IfNotPresent
+    # Image tag
+    tag: "0.86.0"
+
+  # Service account
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+
+  # Security context for container priviliges
+  securityContext: {}
+
+  clusterRole:
+    # Annotations to add to the clusterRole
+    # Can be used in combination with presets that create a cluster role.
+    annotations: {}
+    # A set of rules as documented here : https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # Can be used in combination with presets that create a cluster role to add additional rules.
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - events
+          - namespaces
+          - namespaces/status
+          - nodes
+          - nodes/spec
+          - pods
+          - pods/status
+          - replicationcontrollers
+          - replicationcontrollers/status
+          - resourcequotas
+          - services
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+        - apps
+        resources:
+          - daemonsets
+          - deployments
+          - replicasets
+          - statefulsets
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - extensions
+        resources:
+          - daemonsets
+          - deployments
+          - replicasets
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - batch
+        resources:
+          - jobs
+          - cronjobs
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - autoscaling
+        resources:
+          - horizontalpodautoscalers
+        verbs:
+          - get
+          - list
+          - watch
+
+  clusterRoleBinding:
+    # Annotations to add to the clusterRoleBinding
+    # Can be used in combination with presets that create a cluster role binding.
+    annotations: {}
+
+  # Array of key value pairs defining the ports for the
+  # collector to expose
+  ports:
+    # Prometheus
+    prometheus:
+      name: prometheus
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+
+  # Resource limits & requests. Update according to your own use case as these values might be too low for a typical deployment.
+  resources:
+    requests:
+      cpu: 32m
+      memory: 128Mi
+    limits:
+      cpu: 256m
+      memory: 512Mi
+
+  # Specific Prometheus configuration
+  prometheus:
+    # Low data mode decreases the scrape frequency of the endpoints
+    lowDataMode: false
+    # Keeps only the most important metrics and drops the rest of the scraped metrics
+    importantMetricsOnly: false
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored

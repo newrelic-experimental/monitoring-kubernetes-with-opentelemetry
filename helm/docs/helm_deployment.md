@@ -103,6 +103,14 @@ helm upgrade nrotelk8s \
   # devteamx
   --set statefulset.newrelic.teams.devteamx.endpoint=<NEW_RELIC_OTLP_ENDPOINT_DEVTEAMX> \
   --set statefulset.newrelic.teams.devteamx.licenseKey.value=<NEW_RELIC_LICENSE_KEY_DEVTEAMX> \
+
+  ## singleton
+  # opsteam
+  --set singleton.newrelic.teams.opsteam.endpoint=<NEW_RELIC_OTLP_ENDPOINT_OPSTEAM> \
+  --set singleton.newrelic.teams.opsteam.licenseKey.value=<NEW_RELIC_LICENSE_KEY_OPSTEAM> \
+  # devteamx
+  --set singleton.newrelic.teams.devteamx.endpoint=<NEW_RELIC_OTLP_ENDPOINT_DEVTEAMX> \
+  --set singleton.newrelic.teams.devteamx.licenseKey.value=<NEW_RELIC_LICENSE_KEY_DEVTEAMX> \
   ...
   "newrelic-experimental/nrotelk8s"
 ```

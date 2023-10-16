@@ -1,8 +1,8 @@
 #######################################
 ### Enjoy your OTel K8s experience! ###
 #######################################
-{{ if and (not .Values.traces.enabled) (not .Values.logs.enabled) (not .Values.metrics.enabled) -}}
-  {{ fail "ERROR: At least one of the following must be enabled: traces, logs & metrics!" }}
+{{ if and (not .Values.traces.enabled) (not .Values.logs.enabled) (not .Values.metrics.enabled) (not .Values.events.enabled) -}}
+  {{ fail "ERROR: At least one of the following must be enabled: traces, logs, metrics & events!" }}
 {{- end -}}
 {{ if not .Values.clusterName -}}
   {{ fail "ERROR: Cluster name should be defined!" }}
@@ -130,5 +130,45 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
   {{- end }}
 Metrics are enabled. Statefulset of OTel collectors are deployed.
 {{- end }}
-
+{{ if .Values.events.enabled -}}
+  {{- if and (not .Values.global.newrelic.enabled) (not .Values.singleton.newrelic.teams) -}}
+    {{ fail "ERROR [SINGLETON]: You have enabled events but haven't defined any New Relic account neither in the global section nor in the singleton section to send the data to!" }}
+  {{- end -}}
+  {{- if .Values.global.newrelic.enabled -}}
+    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
+      {{ fail "ERROR [SINGLETON]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- end -}}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [SINGLETON]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [SINGLETON]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [SINGLETON]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- else -}}
+    {{- range $teamName, $teamInfo := .Values.singleton.newrelic.teams -}}
+      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
+        {{ fail "ERROR [SINGLETON]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- end -}}
+      {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
+        {{ fail "ERROR [SINGLETON]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+      {{- end -}}
+      {{- if $teamInfo.licenseKey.secretRef }}
+        {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+          {{ fail "ERROR [SINGLETON]: License key is referenced but its name is not provided!" }}
+        {{- end -}}
+        {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+          {{ fail "ERROR [SINGLETON]: License key is referenced but the key to the license key within the secret is not provided!" }}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+  {{- end }}
+Events are enabled. Singleton of OTel collector is deployed.
+{{- end -}}
 #######################################

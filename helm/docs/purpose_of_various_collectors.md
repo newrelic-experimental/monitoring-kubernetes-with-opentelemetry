@@ -26,3 +26,12 @@ The reason for this is that the traces are mostly to be sampled and sampling wor
 The statefulset is primarily used to scrape the metrics throughout the cluster. It uses the `prometheusreceiver` to fetch metrics per various Kubernetes service discovery possibilities (`services`, `nodes`, `cadvisor`...).
 
 In order to be able able to scale it out, the [Target Allocator](https://github.com/open-telemetry/opentelemetry-operator#target-allocator) is used which distributes the to be scraped endpoints that are discovered by the Kubernetes service discovery as evenly as possible across the instances of the statefulsets so that each endpoint is scraped only once by one collector instance at a time. Thereby, the requirement to maintain a central Prometheus server with huge memory needs can be replaced by multiple smaller instances of collector scrapers. Please refer to the official Open Telemetry [docs](https://opentelemetry.io/docs/collector/scaling/#scaling-the-scrapers) for more!
+
+## Singleton
+
+The singleton is primarily used to fetch the events happening in the cluster from the `kube-apiserver`. It gives information about the status changes of individual components such as:
+
+- when a pod gets killed
+- when a replicaset is scaled out/in
+
+It uses the `k8seventreceiver`. Currently, there are no leader selection algorithm defined for this receveiver. Therefore, it has to run as a singleton because having multiple instances of this receiver, simply means that they fetche and send the same data multiple times.
