@@ -12,6 +12,11 @@ spec:
   # Service Account
   serviceAccount: {{ include "nrotel.deploymentName" . }}
 
+  # Security context for container priviliges
+  {{- with .Values.deployment.securityContext }}
+  securityContext: {{ toYaml . | nindent 4 }}
+  {{- end }}
+
   # Ports to expose per service
   ports:
     - name: prometheus
