@@ -135,7 +135,7 @@ The following tests are implemented to be triggered by the Github workflow on [`
   - where `opsteam` does not have any namespace filter.
   - where `devteam1` has the namespace filter [`devteam1`].
   - where `devteam2` is tagged to be ignored.
-- All types of collectors are deployed: `daemonset`, `deployment-receiver`, `deployment-sampler` & `statefulset`.
+- All types of collectors are deployed: `daemonset`, `deployment-receiver`, `deployment-sampler`, `statefulset` & `singleton`.
 
 The expected outcome is as follows:
 
