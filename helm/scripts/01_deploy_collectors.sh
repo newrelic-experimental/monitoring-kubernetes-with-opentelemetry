@@ -23,6 +23,11 @@ done
 
 ### Check input
 
+# Bash version
+echo "###################################################"
+echo "MAKE SURE THAT YOUR BASH VERSION IS 5 OR HIGHER !!!"
+echo "###################################################"
+
 # Cluster name
 if [[ $clusterName == "" ]]; then
   echo "Cluster name is not defined! Use the flag [--cluster-name]."
