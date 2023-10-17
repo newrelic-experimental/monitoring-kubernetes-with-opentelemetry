@@ -138,6 +138,7 @@ deployment:
           - ""
         resources:
           - pods
+          - namespaces
         verbs:
           - get
           - watch
