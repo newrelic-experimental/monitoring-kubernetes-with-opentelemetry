@@ -9,6 +9,9 @@ spec:
   # Mode
   mode: "deployment"
 
+  # Replicas
+  replicas: {{ .Values.deployment.replicas.sampler }}
+
   # Service Account
   serviceAccount: {{ include "nrotel.deploymentName" . }}
 

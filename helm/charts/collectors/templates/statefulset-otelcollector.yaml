@@ -9,8 +9,8 @@ spec:
   # Mode
   mode: "statefulset"
 
-  # Number of replicas
-  replicas: 2
+  # Replicas
+  replicas: {{ .Values.statefulset.replicas }}
 
   # Service Account
   serviceAccount: {{ include "nrotel.statefulsetName" . }}
