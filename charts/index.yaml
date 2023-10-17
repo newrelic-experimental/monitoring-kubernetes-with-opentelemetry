@@ -2,8 +2,29 @@ apiVersion: v1
 entries:
   nrotelk8s:
   - apiVersion: v2
+    appVersion: 0.86.0
+    created: "2023-10-17T21:23:17.172769+02:00"
+    dependencies:
+    - condition: statefulset.prometheus.nodeExporter.enabled
+      name: prometheus-node-exporter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.17.4
+    - condition: statefulset.prometheus.kubeStateMetrics.enabled
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.7.0
+    description: A Helm chart for Kubernetes
+    digest: 3e53a60c1733d3916e33c711fb18ebe65db62bd06a1137d393333e1904623f0c
+    maintainers:
+    - name: utr1903
+    name: nrotelk8s
+    type: application
+    urls:
+    - nrotelk8s-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     appVersion: 0.84.0
-    created: "2023-09-06T20:57:23.901855+02:00"
+    created: "2023-10-17T21:23:17.169923+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -24,7 +45,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2023-09-06T20:57:23.898369+02:00"
+    created: "2023-10-17T21:23:17.166846+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -45,7 +66,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2023-09-06T20:57:23.895691+02:00"
+    created: "2023-10-17T21:23:17.16392+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -64,4 +85,4 @@ entries:
     urls:
     - nrotelk8s-0.1.0.tgz
     version: 0.1.0
-generated: "2023-09-06T20:57:23.892663+02:00"
+generated: "2023-10-17T21:23:17.159434+02:00"
