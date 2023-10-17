@@ -112,6 +112,13 @@ deployment:
     # Image tag
     tag: "0.86.0"
 
+  # Number of replicas
+  replicas:
+    # Receiver collectors
+    receiver: 1
+    # Sampler collectors
+    sampler: 1
+
   # Service account
   serviceAccount:
     # Annotations to add to the service account
@@ -363,7 +370,7 @@ statefulset:
     # Image tag
     tag: "0.86.0"
 
-  # Amount of replicas
+  # Number of replicas
   replicas: 2
 
   # Service account
