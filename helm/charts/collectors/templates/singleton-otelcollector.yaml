@@ -110,7 +110,7 @@ spec:
             {{- end }}
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.singleton.ports.prometheus.port }}
+                - 127.0.0.1:{{ .Values.singleton.ports.prometheus.port }}
             {{- if .Values.deployment.prometheus.importantMetricsOnly }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -297,5 +297,5 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.singleton.ports.prometheus.targetPort }}
+          address: 127.0.0.1:{{ .Values.singleton.ports.prometheus.targetPort }}
 {{- end -}}
