@@ -127,6 +127,9 @@ deployment:
   # Security context for container priviliges
   securityContext: {}
 
+  # Annotations for collector pods
+  annotations: {}
+
   clusterRole:
     # Annotations to add to the clusterRole
     # Can be used in combination with presets that create a cluster role.
@@ -252,6 +255,9 @@ daemonset:
 
   # Security context for container priviliges
   securityContext: {}
+
+  # Annotations for collector pods
+  annotations: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
@@ -381,6 +387,9 @@ statefulset:
 
   # Security context for container priviliges
   securityContext: {}
+
+  # Annotations for collector pods
+  annotations: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
@@ -583,6 +592,9 @@ singleton:
 
   # Security context for container priviliges
   securityContext: {}
+
+  # Annotations for collector pods
+  annotations: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
