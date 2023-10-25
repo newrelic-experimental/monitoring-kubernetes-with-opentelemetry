@@ -20,6 +20,13 @@ spec:
   securityContext: {{ toYaml . | nindent 4 }}
   {{- end }}
 
+  # Annotations for the pods
+  podAnnotations:
+    prometheus.io/scrape: "false" # This should be false by default. Otherwise 'otelcollector' self scraper job AND 'kubernetes-pods' scrape job will both scrape
+  {{- range $key, $val := .Values.deployment.annotations }}
+    {{ $key }}: {{ $val }}
+  {{- end }}
+
   # Ports to expose per service
   ports:
     - name: prometheus

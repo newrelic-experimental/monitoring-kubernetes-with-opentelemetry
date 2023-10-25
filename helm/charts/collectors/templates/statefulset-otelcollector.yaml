@@ -15,6 +15,13 @@ spec:
   # Service Account
   serviceAccount: {{ include "nrotel.statefulsetName" . }}
 
+  # Annotations for the pods
+  podAnnotations:
+    prometheus.io/scrape: "false" # This should be false by default. Otherwise 'otelcollector' self scraper job AND 'kubernetes-pods' scrape job will both scrape
+  {{- range $key, $val := .Values.statefulset.annotations }}
+    {{ $key }}: {{ $val }}
+  {{- end }}
+
   # Target allocator
   targetAllocator:
     enabled: true
@@ -406,6 +413,47 @@ spec:
                 - source_labels: [__meta_kubernetes_service_name]
                   action: replace
                   target_label: service
+                - source_labels: [__meta_kubernetes_pod_node_name]
+                  action: replace
+                  target_label: node
+
+            - job_name: 'kubernetes-pods'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
+              scrape_interval: 30s
+            {{- end }}
+              honor_labels: true
+
+              kubernetes_sd_configs:
+                - role: pod
+
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: true
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+                  action: drop
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_namespace]
+                  action: replace
+                  target_label: namespace
+                - source_labels: [__meta_kubernetes_pod_name]
+                  action: replace
+                  target_label: pod
                 - source_labels: [__meta_kubernetes_pod_node_name]
                   action: replace
                   target_label: node
