@@ -117,7 +117,7 @@ spec:
             {{- end }}
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
+                - 127.0.0.1:{{ .Values.statefulset.ports.prometheus.port }}
             {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
               metric_relabel_configs:
                 - source_labels: [__name__]
