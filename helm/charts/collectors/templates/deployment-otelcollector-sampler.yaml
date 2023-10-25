@@ -279,5 +279,5 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.deployment.ports.prometheus.targetPort }}
+          address: 127.0.0.1:{{ .Values.deployment.ports.prometheus.targetPort }}
 {{- end -}}

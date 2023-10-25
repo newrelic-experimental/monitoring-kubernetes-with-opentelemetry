@@ -371,5 +371,5 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.daemonset.ports.prometheus.targetPort }}
+          address: 127.0.0.1:{{ .Values.daemonset.ports.prometheus.targetPort }}
 {{- end -}}
