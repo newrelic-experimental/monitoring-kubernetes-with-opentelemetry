@@ -3,7 +3,28 @@ entries:
   nrotelk8s:
   - apiVersion: v2
     appVersion: 0.86.0
-    created: "2023-10-17T21:23:17.172769+02:00"
+    created: "2023-10-25T21:59:08.637639+02:00"
+    dependencies:
+    - condition: statefulset.prometheus.nodeExporter.enabled
+      name: prometheus-node-exporter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.17.4
+    - condition: statefulset.prometheus.kubeStateMetrics.enabled
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.7.0
+    description: A Helm chart for Kubernetes
+    digest: 025b71818368620d5579dfcad1eaf02c4372ae4238084b5e9d06d4dfc48e1a1a
+    maintainers:
+    - name: utr1903
+    name: nrotelk8s
+    type: application
+    urls:
+    - nrotelk8s-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v2
+    appVersion: 0.86.0
+    created: "2023-10-25T21:59:08.634784+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -24,7 +45,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 0.84.0
-    created: "2023-10-17T21:23:17.169923+02:00"
+    created: "2023-10-25T21:59:08.6314+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -45,7 +66,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2023-10-17T21:23:17.166846+02:00"
+    created: "2023-10-25T21:59:08.628764+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -66,7 +87,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2023-10-17T21:23:17.16392+02:00"
+    created: "2023-10-25T21:59:08.625806+02:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -85,4 +106,4 @@ entries:
     urls:
     - nrotelk8s-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-17T21:23:17.159434+02:00"
+generated: "2023-10-25T21:59:08.622053+02:00"
