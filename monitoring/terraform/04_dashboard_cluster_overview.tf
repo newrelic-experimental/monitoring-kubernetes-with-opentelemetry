@@ -513,6 +513,78 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         EOF
       }
     }
+
+    # Replicaset events
+    widget_log_table {
+      title  = "Replicaset events"
+      row    = 11
+      column = 1
+      height = 4
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'ReplicaSet' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(replicaset)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND metricName LIKE 'kube_replicaset_status_replicas' AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
+        EOF
+      }
+    }
+
+    # Daemonset events
+    widget_log_table {
+      title  = "Daemonset events"
+      row    = 15
+      column = 1
+      height = 4
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'DaemonSet' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(daemonset)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND metricName LIKE 'kube_daemonset_status_number_available' AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
+        EOF
+      }
+    }
+
+    # Statefulset events
+    widget_log_table {
+      title  = "Statefulset events"
+      row    = 19
+      column = 1
+      height = 4
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'StatefulSet' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(statefulset)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND metricName LIKE 'kube_statefulset_status_replicas' AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
+        EOF
+      }
+    }
   }
 
   ####################
