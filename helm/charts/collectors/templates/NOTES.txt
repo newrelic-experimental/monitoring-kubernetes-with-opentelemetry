@@ -15,7 +15,11 @@
     {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
       {{ fail "ERROR [DEPLOYMENT]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
     {{- end -}}
+    {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
+      {{- if eq $teamName "opsteam" -}}
+        {{ $isOpsteamDefined = true }}
+      {{- end -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
         {{ fail "ERROR [DEPLOYMENT]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
       {{- end -}}
@@ -28,8 +32,15 @@
         {{- end -}}
       {{- end -}}
     {{- end }}
+    {{- if not $isOpsteamDefined -}}
+      {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
+    {{- end -}}
   {{- else -}}
+    {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams -}}
+      {{- if eq $teamName "opsteam" -}}
+        {{ $isOpsteamDefined = true }}
+      {{- end -}}
       {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
         {{ fail "ERROR [DEPLOYMENT]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
       {{- end -}}
@@ -45,6 +56,9 @@
         {{- end -}}
       {{- end -}}
     {{- end }}
+    {{- if not $isOpsteamDefined -}}
+      {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
+    {{- end -}}
   {{- end }}
 Traces are enabled. Deployments of OTel collectors are deployed.
 {{- end -}}
@@ -56,7 +70,11 @@ Traces are enabled. Deployments of OTel collectors are deployed.
     {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
       {{ fail "ERROR [DAEMONSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
     {{- end -}}
+    {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
+      {{- if eq $teamName "opsteam" -}}
+        {{ $isOpsteamDefined = true }}
+      {{- end -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
         {{ fail "ERROR [DAEMONSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
       {{- end -}}
@@ -69,8 +87,15 @@ Traces are enabled. Deployments of OTel collectors are deployed.
         {{- end -}}
       {{- end -}}
     {{- end }}
+    {{- if not $isOpsteamDefined -}}
+      {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
+    {{- end -}}
   {{- else -}}
+    {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams -}}
+      {{- if eq $teamName "opsteam" -}}
+        {{ $isOpsteamDefined = true }}
+      {{- end -}}
       {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
         {{ fail "ERROR [DAEMONSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
       {{- end -}}
@@ -86,6 +111,9 @@ Traces are enabled. Deployments of OTel collectors are deployed.
         {{- end -}}
       {{- end -}}
     {{- end }}
+    {{- if not $isOpsteamDefined -}}
+      {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
+    {{- end -}}
   {{- end }}
 Logs are enabled. Daemonset of OTel collectors are deployed.
 {{- end -}}
@@ -97,7 +125,11 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
     {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
       {{ fail "ERROR [STATEFULSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
     {{- end -}}
+    {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
+      {{- if eq $teamName "opsteam" -}}
+        {{ $isOpsteamDefined = true }}
+      {{- end -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
         {{ fail "ERROR [STATEFULSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
       {{- end -}}
@@ -110,8 +142,15 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
         {{- end -}}
       {{- end -}}
     {{- end }}
+    {{- if not $isOpsteamDefined -}}
+      {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
+    {{- end -}}
   {{- else -}}
+    {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams -}}
+      {{- if eq $teamName "opsteam" -}}
+        {{ $isOpsteamDefined = true }}
+      {{- end -}}
       {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
         {{ fail "ERROR [STATEFULSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
       {{- end -}}
@@ -127,6 +166,9 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
         {{- end -}}
       {{- end -}}
     {{- end }}
+    {{- if not $isOpsteamDefined -}}
+      {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
+    {{- end -}}
   {{- end }}
 Metrics are enabled. Statefulset of OTel collectors are deployed.
 {{- end }}

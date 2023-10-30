@@ -49,6 +49,8 @@ If the New Relic account where you want to send the data to is
 
 There 2 ways: global & individual.
 
+**REMARK:** The solution requires one main New Relic account which represents the infrastructure team who should be aware of every fundamental thing going on in the cluster. This is named as the `opsteam` and this is a mandatory field under each `teams` section!
+
 #### Global
 
 This is the default way. If all of your New Relic accounts to which you are willing to send various telemetry data are in the same New Relic datacenter (US or EU), you can simply use the global configuration:
