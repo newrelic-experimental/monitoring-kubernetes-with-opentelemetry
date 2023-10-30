@@ -531,7 +531,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
             (
               FROM Metric SELECT uniques(replicaset)
                 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
-                  AND metricName LIKE 'kube_replicaset_status_replicas' AND namespace IN ({{namespaces}})
+                  AND replicaset IS NOT NULL AND metricName = 'kube_replicaset_status_replicas' AND namespace IN ({{namespaces}})
                 LIMIT MAX
             )
         EOF
@@ -555,7 +555,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
             (
               FROM Metric SELECT uniques(daemonset)
                 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
-                  AND metricName LIKE 'kube_daemonset_status_number_available' AND namespace IN ({{namespaces}})
+                  AND daemonset IS NOT NULL AND metricName = 'kube_daemonset_status_number_available' AND namespace IN ({{namespaces}})
                 LIMIT MAX
             )
         EOF
@@ -579,7 +579,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
             (
               FROM Metric SELECT uniques(statefulset)
                 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
-                  AND metricName LIKE 'kube_statefulset_status_replicas' AND namespace IN ({{namespaces}})
+                  AND statefulset IS NOT NULL AND metricName = 'kube_statefulset_status_replicas' AND namespace IN ({{namespaces}})
                 LIMIT MAX
             )
         EOF
