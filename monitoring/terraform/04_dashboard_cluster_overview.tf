@@ -870,7 +870,8 @@ resource "newrelic_one_dashboard" "cluster_overview" {
             (
               FROM Metric SELECT uniques(pod)
                 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
-                  AND pod IS NOT NULL AND metricName = 'kube_pod_info' AND k8s.node.name IN ({{nodes}}) AND namespace IN ({{namespaces}}) LIMIT MAX
+                  AND pod IS NOT NULL AND metricName = 'kube_pod_info' AND node IN ({{nodes}}) AND namespace IN ({{namespaces}})
+                LIMIT MAX
             )
         EOF
       }
