@@ -852,6 +852,29 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         EOF
       }
     }
+
+    # Pod events
+    widget_log_table {
+      title  = "Pod events"
+      row    = 17
+      column = 1
+      height = 5
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'Pod' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(pod)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND pod IS NOT NULL AND metricName = 'kube_pod_info' AND k8s.node.name IN ({{nodes}}) AND namespace IN ({{namespaces}}) LIMIT MAX
+            )
+        EOF
+      }
+    }
   }
 
   # Nodes
