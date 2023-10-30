@@ -217,6 +217,24 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         EOF
       }
     }
+
+    # Collector events
+    widget_log_table {
+      title  = "Collector events"
+      row    = 15
+      column = 1
+      height = 5
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'Node' AND k8s.object.name IN ({{nodes}})
+        EOF
+      }
+    }
   }
 
   ##########################
