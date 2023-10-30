@@ -218,9 +218,9 @@ resource "newrelic_one_dashboard" "cluster_overview" {
       }
     }
 
-    # Collector events
+    # Node events
     widget_log_table {
-      title  = "Collector events"
+      title  = "Node events"
       row    = 15
       column = 1
       height = 5
