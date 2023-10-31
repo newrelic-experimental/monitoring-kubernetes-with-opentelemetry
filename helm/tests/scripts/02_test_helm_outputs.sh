@@ -131,7 +131,7 @@ runTests() {
 
   # OTLP exporter for opsteam should be configured
   collectorDaemonsetOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlp/opsteam')
-  if [[ $collectorDaemonsetOpsteamExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorDaemonsetOpsteamExporterOtlpConfigCheck == "" && $collectorDaemonsetOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
     echo "Message: Exporter should be configured but it has not!"
@@ -140,7 +140,7 @@ runTests() {
 
   # OTLP exporter for devteam1 should be configured
   collectorDaemonsetDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlp/devteam1')
-  if [[ $collectorDaemonsetDevteam1ExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorDaemonsetDevteam1ExporterOtlpConfigCheck == "" && $collectorDaemonsetDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
     echo "Message: Exporter should be configured but it has not!"
@@ -373,7 +373,7 @@ runTests() {
 
   # OTLP exporter for opsteam should be configured - receiver
   collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlp/opsteam')
-  if [[ $collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck == "" && $collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: receiver"
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -383,7 +383,7 @@ runTests() {
 
   # OTLP exporter for devteam1 should be configured - receiver
   collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlp/devteam1')
-  if [[ $collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck == "" && $collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: receiver"
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -412,7 +412,7 @@ runTests() {
 
   # OTLP exporter for opsteam should be configured - sampler
   collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlp/opsteam')
-  if [[ $collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck == "" && $collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: sampler"
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -422,7 +422,7 @@ runTests() {
 
   # OTLP exporter for devteam1 should be configured - sampler
   collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlp/devteam1')
-  if [[ $collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck == "" && $collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: sampler"
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -674,7 +674,7 @@ runTests() {
 
   # OTLP exporter for opsteam should be configured
   collectorStatefulsetOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlp/opsteam')
-  if [[ $collectorStatefulsetOpsteamExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorStatefulsetOpsteamExporterOtlpConfigCheck == "" && $collectorStatefulsetOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
     echo "Message: Exporter should be configured but it has not!"
@@ -683,7 +683,7 @@ runTests() {
 
   # OTLP exporter for devteam1 should be configured
   collectorStatefulsetDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlp/devteam1')
-  if [[ $collectorStatefulsetDevteam1ExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorStatefulsetDevteam1ExporterOtlpConfigCheck == "" && $collectorStatefulsetDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
     echo "Message: Exporter should be configured but it has not!"
