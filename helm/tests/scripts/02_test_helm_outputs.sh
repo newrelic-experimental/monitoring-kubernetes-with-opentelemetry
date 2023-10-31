@@ -782,11 +782,11 @@ runTests() {
     exit 1
   fi
 
-  # Secret for devteam1 should be created
+  # Secret for devteam1 should not be created
   secretSingletonDevteam1Check=$(echo "$helmTemplate" | yq 'select((.kind == "Secret") and (.metadata.name == "'${secretSingletonDevteam1Name}'")).metadata.name')
-  if [[ $secretSingletonDevteam1Check != $secretSingletonDevteam1Name ]]; then
+  if [[ $secretSingletonDevteam1Check != "" ]]; then
     echo "Team: devteam1"
-    echo "Message: Secret should have been created but it has not!"
+    echo "Message: Secret should not have been created but it has!"
     exit 1
   fi
 
@@ -813,11 +813,11 @@ runTests() {
     exit 1
   fi
 
-  # Secret for devteam1 should be assigned
+  # Secret for devteam1 should not be assigned
   collectorSingletonDevteam1EnvVarCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.env[] | select(.valueFrom.secretKeyRef.name == "'${secretSingletonDevteam1Name}'").valueFrom.secretKeyRef.name')
-  if [[ $collectorSingletonDevteam1EnvVarCheck != $secretSingletonDevteam1Name ]]; then
+  if [[ $collectorSingletonDevteam1EnvVarCheck != "" ]]; then
     echo "Team: devteam1"
-    echo "Message: Environment variable should have been assigned but it has not!"
+    echo "Message: Environment variable should not have been assigned but it has!"
     exit 1
   fi
 
@@ -836,9 +836,9 @@ runTests() {
   echo -e "\n---"
   echo "Message: Testing collector processors configuration..."
 
-  # Filter processor for devteam1 should be configured
+  # Filter processor for devteam1 should not be configured
   collectorSingletonDevteam1ProcessorFilterConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.processors.filter/devteam1')
-  if [[ $collectorSingletonDevteam1ProcessorFilterConfigCheck == "" ]]; then
+  if [[ $collectorSingletonDevteam1ProcessorFilterConfigCheck != "null" ]]; then
     echo "Team: devteam1"
     echo "Component: filterprocessor"
     echo "Processor should be configured but it has not!"
@@ -863,19 +863,19 @@ runTests() {
 
   # OTLP exporter for opsteam should be configured
   collectorSingletonOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlp/opsteam')
-  if [[ $collectorSingletonOpsteamExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorSingletonOpsteamExporterOtlpConfigCheck == "" && $collectorSingletonOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
     echo "Message: Exporter should be configured but it has not!"
     exit 1
   fi
 
-  # OTLP exporter for devteam1 should be configured
+  # OTLP exporter for devteam1 should not be configured
   collectorSingletonDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlp/devteam1')
-  if [[ $collectorSingletonDevteam1ExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorSingletonDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
-    echo "Message: Exporter should be configured but it has not!"
+    echo "Message: Exporter should not be configured but it has!"
     exit 1
   fi
 
@@ -905,33 +905,33 @@ runTests() {
     exit 1
   fi
 
-  # Pipeline filter processor for devteam1 should be configured
+  # Pipeline filter processor for devteam1 should not be configured
   collectorSingletonDevteam1PipelineProcessorFilterConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.processors[]' | yq 'select("filter/devteam1")')
-  if [[ $collectorSingletonDevteam1PipelineProcessorFilterConfigCheck == "" ]]; then
+  if [[ $collectorSingletonDevteam1PipelineProcessorFilterConfigCheck != "" ]]; then
     echo "Team: devteam1"
     echo "Component: filterprocessor"
     echo "Telemetry: logs"
-    echo "Message: Pipeline should be configured but it has not!"
+    echo "Message: Pipeline should not be configured but it has!"
     exit 1
   fi
 
-  # Pipeline otlp exporter for devteam1 should be configured
+  # Pipeline otlp exporter for devteam1 should not be configured
   collectorSingletonDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.exporters[]' | yq 'select("otlp/devteam1")')
-  if [[ $collectorSingletonDevteam1PipelineExporterOtlpConfigCheck == "" ]]; then
+  if [[ $collectorSingletonDevteam1PipelineExporterOtlpConfigCheck != "" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
     echo "Telemetry: logs"
-    echo "Message: Pipeline should be configured but it has not!"
+    echo "Message: Pipeline should not be configured but it has!"
     exit 1
   fi
 
-  # Pipeline filter processor for devteam2 should be configured
+  # Pipeline filter processor for devteam2 should not be configured
   collectorSingletonDevteam2PipelineProcessorFilterConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam2.processors[]' | yq 'select("filter/devteam2")')
   if [[ $collectorSingletonDevteam2PipelineProcessorFilterConfigCheck != "" ]]; then
     echo "Team: devteam2"
     echo "Component: filterprocessor"
     echo "Telemetry: logs"
-    echo "Message: Pipeline should be configured but it has not!"
+    echo "Message: Pipeline should not be configured but it has!"
     exit 1
   fi
 
