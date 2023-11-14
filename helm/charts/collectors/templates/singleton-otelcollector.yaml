@@ -23,7 +23,7 @@ spec:
   # Annotations for the pods
   podAnnotations:
     prometheus.io/scrape: "false" # This should be false by default. Otherwise 'otelcollector' self scraper job AND 'kubernetes-pods' scrape job will both scrape
-  {{- range $key, $val := .Values.deployment.annotations }}
+  {{- range $key, $val := .Values.singleton.annotations }}
     {{ $key }}: {{ $val }}
   {{- end }}
 
@@ -118,7 +118,7 @@ spec:
               static_configs:
               - targets:
                 - 127.0.0.1:{{ .Values.singleton.ports.prometheus.port }}
-            {{- if .Values.deployment.prometheus.importantMetricsOnly }}
+            {{- if .Values.singleton.prometheus.importantMetricsOnly }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   separator: ;
