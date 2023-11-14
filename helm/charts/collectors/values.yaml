@@ -173,10 +173,22 @@ deployment:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Receiver collectors
+    receiver:
+      # Collector scraping its own metrics
+      self:
+        # Scrape interval
+        scrapeInterval: 60s
+        # Keeps only the most important metrics and drops the rest of the scraped metrics
+        importantMetricsOnly: false
+    # Sampler collectors
+    sampler:
+      # Collector scraping its own metrics
+      self:
+        # Scrape interval
+        scrapeInterval: 60s
+        # Keeps only the most important metrics and drops the rest of the scraped metrics
+        importantMetricsOnly: false
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -302,10 +314,12 @@ daemonset:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
 
   # Log tailing & parsing rules
   filelog:
@@ -556,10 +570,34 @@ statefulset:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
+    # Kube API server specific configuration
+    kubeApiServer:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
+    # Nodes specific configuration
+    nodes:
+      # Scrape interval
+      scrapeInterval: 60s
+    # cAdvisor specific configuration
+    cAdvisor:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
+    # Core DNS specific configuration
+    coreDns:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
     # Node exporter specific configuration
     nodeExporter:
       # - If you don't have any node-exporter, you can let this chart deploy it as a dependency by setting
@@ -569,6 +607,10 @@ statefulset:
       #   will not deploy any node-exporter.
       enabled: true
       serviceNameRef: null
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
     # Kube state metrics specific configuration
     kubeStateMetrics:
       # - If you don't have any kube-state-metrics, you can let this chart deploy it as a dependency by setting
@@ -578,6 +620,10 @@ statefulset:
       #   will not deploy any kube-state-metrics.
       enabled: true
       serviceNameRef: null
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -750,10 +796,12 @@ singleton:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetricsOnly: false
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
