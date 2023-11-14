@@ -129,14 +129,22 @@ spec:
               static_configs:
               - targets:
                 - 127.0.0.1:{{ .Values.daemonset.ports.prometheus.port }}
-            {{- if .Values.daemonset.prometheus.self.importantMetricsOnly }}
+              {{- if ne (len .Values.daemonset.prometheus.self.importantMetrics) 0 }}
+                {{ $metrics := "" -}}
+                {{- range $index, $metric := .Values.daemonset.prometheus.self.importantMetrics -}}
+                  {{- if eq $index 0 -}}
+                    {{- $metrics = printf "%s" $metric -}}
+                  {{ else }}
+                    {{- $metrics = printf "%s|%s" $metrics $metric -}}
+                  {{- end -}}
+                {{- end -}}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   separator: ;
-                  regex: otelcol_exporter_queue_size|otelcol_exporter_queue_capacity|otelcol_processor_dropped_metric_points|otelcol_processor_dropped_spans|otelcol_processor_dropped_log_records|otelcol_exporter_enqueue_failed_metric_points|otelcol_exporter_enqueue_failed_spans|otelcol_exporter_enqueue_failed_log_records|otelcol_receiver_refused_metric_points|otelcol_receiver_refused_spans|otelcol_receiver_refused_log_records|otelcol_exporter_refused_metric_points|otelcol_exporter_refused_spans|otelcol_exporter_refused_log_records
+                  regex: {{ $metrics }}
                   replacement: $1
                   action: keep
-            {{- end }}
+              {{- end }}
       {{- with .Values.daemonset.filelog }}
       filelog: {{ toYaml . | nindent 8 }}
       {{- end }}
