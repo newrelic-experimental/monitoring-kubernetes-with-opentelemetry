@@ -399,12 +399,9 @@ spec:
                   action: keep
               {{- end }}
 
+            {{- if .Values.statefulset.prometheus.serviceEndpoints.scrape }}
             - job_name: 'kubernetes-service-endpoints'
-            {{- if .Values.statefulset.prometheus.lowDataMode }}
-              scrape_interval: 60s
-            {{- else }}
-              scrape_interval: 30s
-            {{- end }}
+              scrape_interval: {{ .Values.statefulset.prometheus.serviceEndpoints.scrapeInterval }}
               honor_labels: true
 
               kubernetes_sd_configs:
@@ -449,46 +446,27 @@ spec:
                   action: replace
                   target_label: node
 
-            - job_name: 'kubernetes-pods'
-            {{- if .Values.statefulset.prometheus.lowDataMode }}
-              scrape_interval: 60s
-            {{- else }}
-              scrape_interval: 30s
-            {{- end }}
-              honor_labels: true
-
-              kubernetes_sd_configs:
-                - role: pod
-
-              relabel_configs:
-                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              {{- if ne (len .Values.statefulset.prometheus.serviceEndpoints.importantMetrics) 0 }}
+                {{ $metrics := "" -}}
+                {{- range $index, $metric := .Values.statefulset.prometheus.serviceEndpoints.importantMetrics -}}
+                  {{- if eq $index 0 -}}
+                    {{- $metrics = printf "%s" $metric -}}
+                  {{ else }}
+                    {{- $metrics = printf "%s|%s" $metrics $metric -}}
+                  {{- end -}}
+                {{- end }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  separator: ;
+                  regex: {{ $metrics }}
+                  replacement: $1
                   action: keep
-                  regex: true
-                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
-                  action: drop
-                  regex: true
-                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
-                  action: replace
-                  target_label: __scheme__
-                  regex: (https?)
-                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-                  action: replace
-                  target_label: __metrics_path__
-                  regex: (.+)
-                - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-                  action: replace
-                  target_label: __address__
-                  regex: ([^:]+)(?::\d+)?;(\d+)
-                  replacement: $$1:$$2
-                - source_labels: [__meta_kubernetes_namespace]
-                  action: replace
-                  target_label: namespace
-                - source_labels: [__meta_kubernetes_pod_name]
-                  action: replace
-                  target_label: pod
-                - source_labels: [__meta_kubernetes_pod_node_name]
-                  action: replace
-                  target_label: node
+              {{- end }}
+            {{- end }}
+
+            {{ range $index, $job := .Values.statefulset.prometheus.extraScrapeJobs -}}
+            - {{ toYaml $job | indent 14 | trim }}
+            {{ end }}
 
     processors:
       cumulativetodelta:

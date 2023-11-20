@@ -195,6 +195,7 @@ deployment:
           # - otelcol_exporter_refused_metric_points
           # - otelcol_exporter_refused_spans
           # - otelcol_exporter_refused_log_records
+
     # Sampler collectors
     sampler:
       # Collector scraping its own metrics
@@ -632,6 +633,7 @@ statefulset:
         # - otelcol_exporter_refused_metric_points
         # - otelcol_exporter_refused_spans
         # - otelcol_exporter_refused_log_records
+
     # Kube API server specific configuration
     kubeApiServer:
       # Scrape interval
@@ -644,10 +646,12 @@ statefulset:
         # - workqueue_depth
         # - apiserver_current_inflight_requests
         # - apiserver_dropped_requests_total
+
     # Nodes specific configuration
     nodes:
       # Scrape interval
       scrapeInterval: 60s
+
     # cAdvisor specific configuration
     cAdvisor:
       # Scrape interval
@@ -660,6 +664,7 @@ statefulset:
         # - container_fs_writes_total
         # - container_network_receive_bytes_total
         # - container_network_transmit_bytes_total
+
     # Core DNS specific configuration
     coreDns:
       # Scrape interval
@@ -671,6 +676,7 @@ statefulset:
         # - coredns_dns_responses_total
         # - coredns_panics_total
         # - coredns_cache_hits_total
+
     # Node exporter specific configuration
     nodeExporter:
       # - If you don't have any node-exporter, you can let this chart deploy it as a dependency by setting
@@ -691,6 +697,7 @@ statefulset:
         # - node_memory_Buffers_bytes
         # - node_filesystem_avail_bytes
         # - node_filesystem_size_bytes
+
     # Kube state metrics specific configuration
     kubeStateMetrics:
       # - If you don't have any kube-state-metrics, you can let this chart deploy it as a dependency by setting
@@ -737,6 +744,58 @@ statefulset:
         # - kube_pod_created
         # - kube_pod_container_status_restarts_total
         # - kube_daemonset_status_number_unavailable
+
+    # Kubernetes service endpoint specific configuration
+    serviceEndpoints:
+      # Flag whether scrape job should be created
+      scrape: true
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - metric1
+        # - metric2
+        # - metric3
+
+    # Config for defining extra custom scrape jobs
+    extraScrapeJobs:
+      # Kubernetes pod specific scrape job
+      - job_name: 'kubernetes-pods'
+        scrape_interval: 60s
+        honor_labels: true
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+            action: drop
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $$1:$$2
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: node
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
