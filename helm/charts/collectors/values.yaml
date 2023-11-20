@@ -173,10 +173,51 @@ deployment:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Receiver collectors
+    receiver:
+      # Collector scraping its own metrics
+      self:
+        # Scrape interval
+        scrapeInterval: 60s
+        # Keeps only the most important metrics and drops the rest of the scraped metrics
+        importantMetrics: []
+          # - otelcol_exporter_queue_size
+          # - otelcol_exporter_queue_capacity
+          # - otelcol_processor_dropped_metric_points
+          # - otelcol_processor_dropped_spans
+          # - otelcol_processor_dropped_log_records
+          # - otelcol_exporter_enqueue_failed_metric_points
+          # - otelcol_exporter_enqueue_failed_spans
+          # - otelcol_exporter_enqueue_failed_log_records
+          # - otelcol_receiver_refused_metric_points
+          # - otelcol_receiver_refused_spans
+          # - otelcol_receiver_refused_log_records
+          # - otelcol_exporter_refused_metric_points
+          # - otelcol_exporter_refused_spans
+          # - otelcol_exporter_refused_log_records
+
+    # Sampler collectors
+    sampler:
+      # Collector scraping its own metrics
+      self:
+        # Scrape interval
+        scrapeInterval: 60s
+        # Keeps only the most important metrics and drops the rest of the scraped metrics
+        importantMetrics: []
+          # - otelcol_exporter_queue_size
+          # - otelcol_exporter_queue_capacity
+          # - otelcol_processor_dropped_metric_points
+          # - otelcol_processor_dropped_spans
+          # - otelcol_processor_dropped_log_records
+          # - otelcol_exporter_enqueue_failed_metric_points
+          # - otelcol_exporter_enqueue_failed_spans
+          # - otelcol_exporter_enqueue_failed_log_records
+          # - otelcol_receiver_refused_metric_points
+          # - otelcol_receiver_refused_spans
+          # - otelcol_receiver_refused_log_records
+          # - otelcol_exporter_refused_metric_points
+          # - otelcol_exporter_refused_spans
+          # - otelcol_exporter_refused_log_records
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -302,10 +343,26 @@ daemonset:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - otelcol_exporter_queue_size
+        # - otelcol_exporter_queue_capacity
+        # - otelcol_processor_dropped_metric_points
+        # - otelcol_processor_dropped_spans
+        # - otelcol_processor_dropped_log_records
+        # - otelcol_exporter_enqueue_failed_metric_points
+        # - otelcol_exporter_enqueue_failed_spans
+        # - otelcol_exporter_enqueue_failed_log_records
+        # - otelcol_receiver_refused_metric_points
+        # - otelcol_receiver_refused_spans
+        # - otelcol_receiver_refused_log_records
+        # - otelcol_exporter_refused_metric_points
+        # - otelcol_exporter_refused_spans
+        # - otelcol_exporter_refused_log_records
 
   # Log tailing & parsing rules
   filelog:
@@ -556,10 +613,70 @@ statefulset:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - otelcol_exporter_queue_size
+        # - otelcol_exporter_queue_capacity
+        # - otelcol_processor_dropped_metric_points
+        # - otelcol_processor_dropped_spans
+        # - otelcol_processor_dropped_log_records
+        # - otelcol_exporter_enqueue_failed_metric_points
+        # - otelcol_exporter_enqueue_failed_spans
+        # - otelcol_exporter_enqueue_failed_log_records
+        # - otelcol_receiver_refused_metric_points
+        # - otelcol_receiver_refused_spans
+        # - otelcol_receiver_refused_log_records
+        # - otelcol_exporter_refused_metric_points
+        # - otelcol_exporter_refused_spans
+        # - otelcol_exporter_refused_log_records
+
+    # Kube API server specific configuration
+    kubeApiServer:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - apiserver_request_duration_seconds_.*
+        # - apiserver_request_total
+        # - workqueue_adds_total
+        # - workqueue_depth
+        # - apiserver_current_inflight_requests
+        # - apiserver_dropped_requests_total
+
+    # Nodes specific configuration
+    nodes:
+      # Scrape interval
+      scrapeInterval: 60s
+
+    # cAdvisor specific configuration
+    cAdvisor:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - container_cpu_usage_seconds_total
+        # - container_memory_usage_bytes
+        # - container_fs_reads_total
+        # - container_fs_writes_total
+        # - container_network_receive_bytes_total
+        # - container_network_transmit_bytes_total
+
+    # Core DNS specific configuration
+    coreDns:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - coredns_dns_request_duration_seconds
+        # - coredns_dns_requests_total
+        # - coredns_dns_responses_total
+        # - coredns_panics_total
+        # - coredns_cache_hits_total
+
     # Node exporter specific configuration
     nodeExporter:
       # - If you don't have any node-exporter, you can let this chart deploy it as a dependency by setting
@@ -569,6 +686,18 @@ statefulset:
       #   will not deploy any node-exporter.
       enabled: true
       serviceNameRef: null
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - node_cpu_seconds_total
+        # - node_memory_MemTotal_bytes
+        # - node_memory_MemFree_bytes
+        # - node_memory_Cached_bytes
+        # - node_memory_Buffers_bytes
+        # - node_filesystem_avail_bytes
+        # - node_filesystem_size_bytes
+
     # Kube state metrics specific configuration
     kubeStateMetrics:
       # - If you don't have any kube-state-metrics, you can let this chart deploy it as a dependency by setting
@@ -578,6 +707,95 @@ statefulset:
       #   will not deploy any kube-state-metrics.
       enabled: true
       serviceNameRef: null
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - kube_pod_info
+        # - kube_pod_status_phase
+        # - kube_pod_container_status_waiting
+        # - kube_pod_status_scheduled_time
+        # - kube_daemonset_created
+        # - kube_daemonset_status_number_available
+        # - kube_deployment_status_replicas_unavailable
+        # - kube_deployment_status_condition
+        # - kube_replicaset_status_ready_replicas
+        # - kube_replicaset_status_replicas
+        # - kube_statefulset_replicas
+        # - kube_statefulset_status_replicas
+        # - kube_pod_start_time
+        # - kube_pod_status_reason
+        # - kube_pod_container_resource_limits
+        # - kube_pod_status_scheduled
+        # - kube_pod_container_resource_requests
+        # - kube_pod_status_container_ready_time
+        # - kube_pod_container_status_terminated
+        # - kube_pod_container_status_ready
+        # - kube_statefulset_status_replicas_updated
+        # - kube_statefulset_status_replicas_ready
+        # - kube_daemonset_status_desired_number_scheduled
+        # - kube_deployment_status_replicas_ready
+        # - kube_pod_container_state_started
+        # - kube_statefulset_created
+        # - kube_daemonset_status_updated_number_scheduled
+        # - kube_statefulset_status_replicas_current
+        # - kube_daemonset_status_number_ready
+        # - kube_pod_container_status_running
+        # - kube_pod_created
+        # - kube_pod_container_status_restarts_total
+        # - kube_daemonset_status_number_unavailable
+
+    # Kubernetes service endpoint specific configuration
+    serviceEndpoints:
+      # Flag whether scrape job should be created
+      scrape: true
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - metric1
+        # - metric2
+        # - metric3
+
+    # Config for defining extra custom scrape jobs
+    extraScrapeJobs:
+      # Kubernetes pod specific scrape job
+      - job_name: 'kubernetes-pods'
+        scrape_interval: 60s
+        honor_labels: true
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+            action: drop
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $$1:$$2
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: node
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -750,10 +968,26 @@ singleton:
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - otelcol_exporter_queue_size
+        # - otelcol_exporter_queue_capacity
+        # - otelcol_processor_dropped_metric_points
+        # - otelcol_processor_dropped_spans
+        # - otelcol_processor_dropped_log_records
+        # - otelcol_exporter_enqueue_failed_metric_points
+        # - otelcol_exporter_enqueue_failed_spans
+        # - otelcol_exporter_enqueue_failed_log_records
+        # - otelcol_receiver_refused_metric_points
+        # - otelcol_receiver_refused_spans
+        # - otelcol_receiver_refused_log_records
+        # - otelcol_exporter_refused_metric_points
+        # - otelcol_exporter_refused_spans
+        # - otelcol_exporter_refused_log_records
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
