@@ -137,7 +137,7 @@ spec:
                   {{ else }}
                     {{- $metrics = printf "%s|%s" $metrics $metric -}}
                   {{- end -}}
-                {{- end -}}
+                {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   separator: ;
