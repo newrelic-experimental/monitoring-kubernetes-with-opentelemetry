@@ -42,7 +42,7 @@ spec:
       targetPort: {{ .Values.statefulset.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.statefulset.image.repository }}:{{ .Values.statefulset.image.tag }}"
+  image: "{{ .Values.statefulset.image.repository }}:{{ include "nrotel.statefulsetImageTag" . }}"
   imagePullPolicy: {{ .Values.statefulset.image.pullPolicy }}
 
   # Resources

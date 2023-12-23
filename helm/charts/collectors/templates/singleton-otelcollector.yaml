@@ -35,7 +35,7 @@ spec:
       targetPort: {{ .Values.singleton.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.singleton.image.repository }}:{{ .Values.singleton.image.tag }}"
+  image: "{{ .Values.singleton.image.repository }}:{{ include "nrotel.singletonImageTag" . }}"
   imagePullPolicy: {{ .Values.singleton.image.pullPolicy }}
 
   # Resources

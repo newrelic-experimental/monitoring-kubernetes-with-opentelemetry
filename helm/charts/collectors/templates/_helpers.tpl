@@ -6,6 +6,50 @@ Expand the name of the chart.
 {{- end -}}
 
 {{/*
+Set image tag for deployment collectors.
+*/}}
+{{- define "nrotel.deploymentImageTag" -}}
+{{- if .Values.deployment.image.tag -}}
+{{- printf "%s" .Values.deployment.image.tag -}}
+{{- else -}}
+{{- printf "%s" .Chart.AppVersion -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set image tag for daemonset collectors.
+*/}}
+{{- define "nrotel.daemonsetImageTag" -}}
+{{- if .Values.daemonset.image.tag -}}
+{{- printf "%s" .Values.daemonset.image.tag -}}
+{{- else -}}
+{{- printf "%s" .Chart.AppVersion -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set image tag for statefulset collectors.
+*/}}
+{{- define "nrotel.statefulsetImageTag" -}}
+{{- if .Values.statefulset.image.tag -}}
+{{- printf "%s" .Values.statefulset.image.tag -}}
+{{- else -}}
+{{- printf "%s" .Chart.AppVersion -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set image tag for singleton collectors.
+*/}}
+{{- define "nrotel.singletonImageTag" -}}
+{{- if .Values.singleton.image.tag -}}
+{{- printf "%s" .Values.singleton.image.tag -}}
+{{- else -}}
+{{- printf "%s" .Chart.AppVersion -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Set name for deployment collectors.
 */}}
 {{- define "nrotel.deploymentName" -}}

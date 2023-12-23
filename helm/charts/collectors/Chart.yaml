@@ -15,23 +15,23 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.4.1
+version: 0.5.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.86.0"
+appVersion: "0.87.0"
 
 maintainers:
   - name: utr1903
 
 dependencies:
   - name: prometheus-node-exporter
-    version: 4.17.4
+    version: 4.24.0
     repository: https://prometheus-community.github.io/helm-charts
     condition: statefulset.prometheus.nodeExporter.enabled
   - name: kube-state-metrics
-    version: 5.7.0
+    version: 5.15.2
     repository: https://prometheus-community.github.io/helm-charts
     condition: statefulset.prometheus.kubeStateMetrics.enabled
