@@ -35,7 +35,7 @@ spec:
       targetPort: {{ .Values.deployment.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+  image: "{{ .Values.deployment.image.repository }}:{{ include "nrotel.deploymentImageTag" . }}"
   imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
 
   # Resources

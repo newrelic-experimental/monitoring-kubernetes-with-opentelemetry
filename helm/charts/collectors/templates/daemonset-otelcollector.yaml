@@ -32,7 +32,7 @@ spec:
       targetPort: {{ .Values.daemonset.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.daemonset.image.repository }}:{{ .Values.daemonset.image.tag }}"
+  image: "{{ .Values.daemonset.image.repository }}:{{ include "nrotel.daemonsetImageTag" . }}"
   imagePullPolicy: {{ .Values.daemonset.image.pullPolicy }}
 
   # Resources
