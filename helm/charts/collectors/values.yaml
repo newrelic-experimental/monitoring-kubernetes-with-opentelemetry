@@ -611,6 +611,18 @@ statefulset:
       cpu: 256m
       memory: 512Mi
 
+  # Target allocator
+  targetAllocator:
+    # Strategy to filter the discovered targets before distributing them across collectors.
+    # Options:
+    # - relabel-config (default)
+    filterStrategy: relabel-config
+    # Strategy to distribute targets across collectors.
+    # Options:
+    # - consistent-hashing (default)
+    # - least-weighted
+    allocationStrategy: consistent-hashing
+
   # Specific Prometheus configuration
   prometheus:
     # Collector scraping its own metrics
