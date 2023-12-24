@@ -26,6 +26,8 @@ spec:
   targetAllocator:
     enabled: true
     serviceAccount: {{ include "nrotel.statefulsetName" . }}
+    filterStrategy: {{ .Values.statefulset.targetAllocator.filterStrategy }}
+    allocationStrategy: {{ .Values.statefulset.targetAllocator.allocationStrategy }}
     prometheusCR:
       enabled: false
 
