@@ -769,6 +769,17 @@ statefulset:
         # - metric2
         # - metric3
 
+    # Target allocator specific configuration
+    targetAllocator:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - opentelemetry_allocator_collectors_allocatable
+        # - opentelemetry_allocator_targets
+        # - opentelemetry_allocator_targets_per_collector
+        # - opentelemetry_allocator_targets_remaining
+
     # Config for defining extra custom scrape jobs
     extraScrapeJobs:
       # Kubernetes pod specific scrape job
