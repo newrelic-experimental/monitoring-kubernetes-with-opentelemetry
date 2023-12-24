@@ -466,6 +466,60 @@ spec:
               {{- end }}
             {{- end }}
 
+            - job_name: 'oteltargetallocators'
+              scrape_interval: {{ .Values.statefulset.prometheus.targetAllocator.scrapeInterval }}
+              honor_labels: true
+
+              kubernetes_sd_configs:
+                - role: endpoints
+
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+                  action: drop
+                  regex: true
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: (.+?)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: keep
+                  regex: {{ printf "%s-sts-targetallocator" .Chart.Name }}
+                - source_labels: [__meta_kubernetes_namespace]
+                  action: replace
+                  target_label: namespace
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: replace
+                  target_label: service
+                - source_labels: [__meta_kubernetes_pod_node_name]
+                  action: replace
+                  target_label: node
+
+              {{- if ne (len .Values.statefulset.prometheus.targetAllocator.importantMetrics) 0 }}
+                {{ $metrics := "" -}}
+                {{- range $index, $metric := .Values.statefulset.prometheus.targetAllocator.importantMetrics -}}
+                  {{- if eq $index 0 -}}
+                    {{- $metrics = printf "%s" $metric -}}
+                  {{ else }}
+                    {{- $metrics = printf "%s|%s" $metrics $metric -}}
+                  {{- end -}}
+                {{- end }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  separator: ;
+                  regex: {{ $metrics }}
+                  replacement: $1
+                  action: keep
+              {{- end }}
+
             {{ range $index, $job := .Values.statefulset.prometheus.extraScrapeJobs -}}
             - {{ toYaml $job | indent 14 | trim }}
             {{ end }}
