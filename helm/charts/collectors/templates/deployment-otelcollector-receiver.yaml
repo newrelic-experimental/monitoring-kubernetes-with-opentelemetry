@@ -255,7 +255,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 20
+        size_in_percentage: 40
 
     service:
       extensions:
