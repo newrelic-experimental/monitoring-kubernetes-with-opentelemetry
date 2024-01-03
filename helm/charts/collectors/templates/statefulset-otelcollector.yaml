@@ -525,7 +525,6 @@ spec:
             {{ end }}
 
     processors:
-      cumulativetodelta:
       resourcedetection:
         detectors: [env, azure]
         azure:
@@ -702,7 +701,6 @@ spec:
             - prometheus/self
           processors:
             - memory_limiter
-            - cumulativetodelta
             - resourcedetection
             - k8sattributes
             - attributes
@@ -720,7 +718,6 @@ spec:
             - prometheus
           processors:
             - memory_limiter
-            - cumulativetodelta
             - resourcedetection
             - k8sattributes
             - attributes
@@ -742,7 +739,6 @@ spec:
             - prometheus
           processors:
             - memory_limiter
-            - cumulativetodelta
             - resourcedetection
             - k8sattributes
             - attributes

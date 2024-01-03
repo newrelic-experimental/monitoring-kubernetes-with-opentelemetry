@@ -133,7 +133,6 @@ spec:
       k8s_events:
 
     processors:
-      cumulativetodelta:
       k8sattributes:
         extract:
           metadata:
@@ -218,7 +217,6 @@ spec:
             - prometheus/self
           processors:
             - memory_limiter
-            - cumulativetodelta
             - k8sattributes
             - attributes
             - attributes/self

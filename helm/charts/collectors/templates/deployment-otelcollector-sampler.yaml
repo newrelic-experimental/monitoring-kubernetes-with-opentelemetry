@@ -136,7 +136,6 @@ spec:
           http:
 
     processors:
-      cumulativetodelta:
       attributes:
         actions:
           - key: k8s.cluster.name
@@ -242,7 +241,6 @@ spec:
             - prometheus/self
           processors:
             - memory_limiter
-            - cumulativetodelta
             - attributes
             - attributes/self
             - batch
