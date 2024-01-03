@@ -133,7 +133,6 @@ spec:
       k8s_events:
 
     processors:
-      cumulativetodelta:
       k8sattributes:
         extract:
           metadata:
@@ -207,7 +206,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 20
+        size_in_percentage: 40
 
     service:
       extensions:
@@ -217,11 +216,10 @@ spec:
           receivers:
             - prometheus/self
           processors:
-            - cumulativetodelta
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/opsteam
@@ -233,10 +231,10 @@ spec:
           receivers:
             - k8s_events
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/{{ $teamName }}
@@ -250,10 +248,10 @@ spec:
           receivers:
             - k8s_events
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/{{ $teamName }}

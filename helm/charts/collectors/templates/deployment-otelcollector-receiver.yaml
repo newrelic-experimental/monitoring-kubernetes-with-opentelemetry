@@ -136,7 +136,6 @@ spec:
           http:
 
     processors:
-      cumulativetodelta:
       k8sattributes:
         extract:
           metadata:
@@ -255,7 +254,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 20
+        size_in_percentage: 40
 
     service:
       extensions:
@@ -265,11 +264,10 @@ spec:
           receivers:
             - prometheus/self
           processors:
-            - cumulativetodelta
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/opsteam
@@ -281,10 +279,9 @@ spec:
           receivers:
             - otlp
           processors:
-            - cumulativetodelta
+            - memory_limiter
             - k8sattributes
             - attributes
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
@@ -301,10 +298,9 @@ spec:
           receivers:
             - otlp
           processors:
-            - cumulativetodelta
+            - memory_limiter
             - k8sattributes
             - attributes
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
