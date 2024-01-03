@@ -217,11 +217,11 @@ spec:
           receivers:
             - prometheus/self
           processors:
+            - memory_limiter
             - cumulativetodelta
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/opsteam
@@ -233,10 +233,10 @@ spec:
           receivers:
             - k8s_events
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/{{ $teamName }}
@@ -250,10 +250,10 @@ spec:
           receivers:
             - k8s_events
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/{{ $teamName }}

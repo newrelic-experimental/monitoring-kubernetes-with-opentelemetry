@@ -271,11 +271,11 @@ spec:
           receivers:
             - prometheus/self
           processors:
+            - memory_limiter
             - cumulativetodelta
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/opsteam
@@ -287,9 +287,9 @@ spec:
           receivers:
             - filelog
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
@@ -306,9 +306,9 @@ spec:
           receivers:
             - filelog
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}

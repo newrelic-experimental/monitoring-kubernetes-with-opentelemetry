@@ -701,13 +701,13 @@ spec:
           receivers:
             - prometheus/self
           processors:
+            - memory_limiter
             - cumulativetodelta
             - resourcedetection
             - k8sattributes
             - attributes
             - resource
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
             - otlp/opsteam
@@ -719,12 +719,12 @@ spec:
           receivers:
             - prometheus
           processors:
+            - memory_limiter
             - cumulativetodelta
             - resourcedetection
             - k8sattributes
             - attributes
             - resource
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
@@ -741,12 +741,12 @@ spec:
           receivers:
             - prometheus
           processors:
+            - memory_limiter
             - cumulativetodelta
             - resourcedetection
             - k8sattributes
             - attributes
             - resource
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
