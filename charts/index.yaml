@@ -3,7 +3,28 @@ entries:
   nrotelk8s:
   - apiVersion: v2
     appVersion: 0.87.0
-    created: "2024-01-03T14:08:50.874852+01:00"
+    created: "2024-02-04T17:28:12.593532+01:00"
+    dependencies:
+    - condition: statefulset.prometheus.nodeExporter.enabled
+      name: prometheus-node-exporter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.24.0
+    - condition: statefulset.prometheus.kubeStateMetrics.enabled
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.15.2
+    description: A Helm chart for Kubernetes
+    digest: 0b1805c9140fbab2cf8bbd6640ad564ac5805ccd50583feae3412d4693482e4e
+    maintainers:
+    - name: utr1903
+    name: nrotelk8s
+    type: application
+    urls:
+    - nrotelk8s-0.7.0.tgz
+    version: 0.7.0
+  - apiVersion: v2
+    appVersion: 0.87.0
+    created: "2024-02-04T17:28:12.590063+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -24,7 +45,7 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 0.87.0
-    created: "2024-01-03T14:08:50.871701+01:00"
+    created: "2024-02-04T17:28:12.58696+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -45,7 +66,7 @@ entries:
     version: 0.5.0
   - apiVersion: v2
     appVersion: 0.86.0
-    created: "2024-01-03T14:08:50.868174+01:00"
+    created: "2024-02-04T17:28:12.58376+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -66,7 +87,7 @@ entries:
     version: 0.4.1
   - apiVersion: v2
     appVersion: 0.86.0
-    created: "2024-01-03T14:08:50.865284+01:00"
+    created: "2024-02-04T17:28:12.580436+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -87,7 +108,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 0.86.0
-    created: "2024-01-03T14:08:50.861732+01:00"
+    created: "2024-02-04T17:28:12.577184+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -108,7 +129,7 @@ entries:
     version: 0.3.2
   - apiVersion: v2
     appVersion: 0.86.0
-    created: "2024-01-03T14:08:50.858994+01:00"
+    created: "2024-02-04T17:28:12.573822+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -129,7 +150,7 @@ entries:
     version: 0.3.1
   - apiVersion: v2
     appVersion: 0.86.0
-    created: "2024-01-03T14:08:50.856162+01:00"
+    created: "2024-02-04T17:28:12.571124+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -150,7 +171,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 0.84.0
-    created: "2024-01-03T14:08:50.852864+01:00"
+    created: "2024-02-04T17:28:12.568053+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -171,7 +192,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2024-01-03T14:08:50.850025+01:00"
+    created: "2024-02-04T17:28:12.564327+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -192,7 +213,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 0.81.0
-    created: "2024-01-03T14:08:50.847162+01:00"
+    created: "2024-02-04T17:28:12.561424+01:00"
     dependencies:
     - condition: statefulset.prometheus.nodeExporter.enabled
       name: prometheus-node-exporter
@@ -211,4 +232,4 @@ entries:
     urls:
     - nrotelk8s-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-03T14:08:50.842801+01:00"
+generated: "2024-02-04T17:28:12.558324+01:00"
