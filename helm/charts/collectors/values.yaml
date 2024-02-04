@@ -672,6 +672,9 @@ statefulset:
       importantMetrics: []
         # - container_cpu_usage_seconds_total
         # - container_memory_usage_bytes
+        # - container_memory_working_set_bytes
+        # - container_memory_rss
+        # - container_memory_swap
         # - container_fs_reads_total
         # - container_fs_writes_total
         # - container_network_receive_bytes_total
