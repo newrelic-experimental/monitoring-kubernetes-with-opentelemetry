@@ -135,7 +135,7 @@ resource "newrelic_nrql_alert_condition" "pod_mem_utilization_high" {
   violation_time_limit_seconds = 86400
 
   nrql {
-    query = "FROM Metric SELECT filter(average(container_memory_usage_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor') / filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL FACET pod, container"
+    query = "FROM Metric SELECT filter(average(container_memory_working_set_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor') / filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL FACET pod, container"
   }
 
   critical {
@@ -174,7 +174,7 @@ resource "newrelic_nrql_alert_condition" "pod_mem_utilization_low" {
   violation_time_limit_seconds = 86400
 
   nrql {
-    query = "FROM Metric SELECT filter(average(container_memory_usage_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor') / filter(max(kube_pod_container_resource_requests), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL FACET pod, container"
+    query = "FROM Metric SELECT filter(average(container_memory_working_set_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor') / filter(max(kube_pod_container_resource_requests), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory') * 100 WHERE container IS NOT NULL AND pod IS NOT NULL FACET pod, container"
   }
 
   critical {

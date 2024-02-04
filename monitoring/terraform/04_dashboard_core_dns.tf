@@ -176,7 +176,7 @@ resource "newrelic_one_dashboard" "core_dns" {
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = <<EOF
-        FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry'
+        FROM Metric SELECT average(container_memory_working_set_bytes) WHERE instrumentation.provider = 'opentelemetry'
           AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND k8s.node.name IN ({{nodes}})
           AND container IS NOT NULL AND pod IS NOT NULL AND pod LIKE 'coredns-%' FACET pod, container TIMESERIES AUTO
         EOF

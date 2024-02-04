@@ -208,7 +208,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = <<EOF
-        FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+        FROM Metric SELECT average(container_memory_working_set_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
           AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL
           AND pod IN (
             FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
@@ -231,7 +231,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
         query      = <<EOF
         FROM Metric SELECT
           filter(
-            average(container_memory_usage_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
+            average(container_memory_working_set_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
           )
           /
           filter(

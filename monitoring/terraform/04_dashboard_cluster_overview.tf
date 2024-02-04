@@ -477,7 +477,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = <<EOF
         FROM (
-          FROM Metric SELECT average(container_memory_usage_bytes) AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          FROM Metric SELECT average(container_memory_working_set_bytes) AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
             AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND k8s.node.name IN ({{nodes}}) AND namespace IN ({{namespaces}})
             FACET namespace, pod, container TIMESERIES AUTO LIMIT MAX
           ) SELECT sum(`usage`) FACET namespace TIMESERIES AUTO
@@ -499,7 +499,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         FROM (
           FROM Metric SELECT
             filter(
-              average(container_memory_usage_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
+              average(container_memory_working_set_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
             ) AS `usage`,
             filter(
               max(kube_pod_container_resource_limits), WHERE service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory'
@@ -818,7 +818,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = <<EOF
-        FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+        FROM Metric SELECT average(container_memory_working_set_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
           AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND k8s.node.name IN ({{nodes}})
           AND namespace IN ({{namespaces}}) FACET pod, container TIMESERIES AUTO
         EOF
@@ -838,7 +838,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         query      = <<EOF
         FROM Metric SELECT
           filter(
-            average(container_memory_usage_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor'
+            average(container_memory_working_set_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor'
               AND container IN (
                 FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
                   AND kube_pod_container_resource_limits IS NOT NULL AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory' LIMIT MAX
