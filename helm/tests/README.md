@@ -36,8 +36,8 @@ If any telemetry type is enabled, it also has to have a New Relic block defined 
 
 If any telemetry type and global config are enabled, the OTLP endpoint of the corresponding New Relic account should be valid where
 
-- US -> `otlp.nr-data.net:4317`
-- EU -> `otlp.eu01.nr-data.net:4317`
+- US -> `https://otlp.nr-data.net`
+- EU -> `https://otlp.eu01.nr-data.net`
 
 | K8s object   | Case |
 | ------------ | ---- |
@@ -50,8 +50,8 @@ If any telemetry type and global config are enabled, the OTLP endpoint of the co
 
 If any telemetry type is enabled and individual configs are used, the OTLP endpoint of the corresponding New Relic account should be valid where
 
-- US -> `otlp.nr-data.net:4317`
-- EU -> `otlp.eu01.nr-data.net:4317`
+- US -> `https://otlp.nr-data.net`
+- EU -> `https://otlp.eu01.nr-data.net`
 
 | K8s object   | Case |
 | ------------ | ---- |

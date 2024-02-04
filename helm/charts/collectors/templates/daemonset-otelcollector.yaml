@@ -235,7 +235,7 @@ spec:
     {{- if .Values.global.newrelic.enabled }}
       {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -246,7 +246,7 @@ spec:
     {{- else }}
       {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -276,7 +276,7 @@ spec:
             - attributes/self
             - batch
           exporters:
-            - otlp/opsteam
+            - otlphttp/opsteam
             # - logging
       {{- if .Values.global.newrelic.enabled }}
         {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
@@ -293,7 +293,7 @@ spec:
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
@@ -312,7 +312,7 @@ spec:
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
