@@ -130,7 +130,7 @@ runTests() {
   echo "Message: Testing collector exporter configuration..."
 
   # OTLP exporter for opsteam should be configured
-  collectorDaemonsetOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlp/opsteam')
+  collectorDaemonsetOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlphttp/opsteam')
   if [[ $collectorDaemonsetOpsteamExporterOtlpConfigCheck == "" && $collectorDaemonsetOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -139,7 +139,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam1 should be configured
-  collectorDaemonsetDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlp/devteam1')
+  collectorDaemonsetDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlphttp/devteam1')
   if [[ $collectorDaemonsetDevteam1ExporterOtlpConfigCheck == "" && $collectorDaemonsetDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -148,7 +148,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam2 should not be configured
-  collectorDaemonsetDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlp/devteam2')
+  collectorDaemonsetDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.exporters.otlphttp/devteam2')
   if [[ $collectorDaemonsetDevteam2ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam2"
     echo "Component: otlpexporter"
@@ -164,7 +164,7 @@ runTests() {
   echo "Message: Testing collector pipeline configuration..."
 
   # Pipeline otlp exporter for opsteam should be configured
-  collectorDaemonsetOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.service.pipelines.logs/opsteam.exporters[]' | yq 'select("otlp/opsteam")')
+  collectorDaemonsetOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.service.pipelines.logs/opsteam.exporters[]' | yq 'select("otlphttp/opsteam")')
   if [[ $collectorDaemonsetOpsteamPipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -184,7 +184,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam1 should be configured
-  collectorDaemonsetDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.exporters[]' | yq 'select("otlp/devteam1")')
+  collectorDaemonsetDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.exporters[]' | yq 'select("otlphttp/devteam1")')
   if [[ $collectorDaemonsetDevteam1PipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -204,7 +204,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam2 should not be configured
-  collectorDaemonsetDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.service.pipelines.logs/devteam2.exporters[]' | yq 'select("otlp/devteam2")')
+  collectorDaemonsetDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDaemonsetName}'")).spec.config' | yq '.service.pipelines.logs/devteam2.exporters[]' | yq 'select("otlphttp/devteam2")')
   if [[ $collectorDaemonsetDevteam2PipelineExporterOtlpConfigCheck != "" ]]; then
     echo "Team: devteam2"
     echo "Component: otlpexporter"
@@ -372,7 +372,7 @@ runTests() {
   echo "Message: Testing collector exporter configuration..."
 
   # OTLP exporter for opsteam should be configured - receiver
-  collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlp/opsteam')
+  collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlphttp/opsteam')
   if [[ $collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck == "" && $collectorDeploymentReceiverOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: receiver"
     echo "Team: opsteam"
@@ -382,7 +382,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam1 should be configured - receiver
-  collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlp/devteam1')
+  collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlphttp/devteam1')
   if [[ $collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck == "" && $collectorDeploymentReceiverDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: receiver"
     echo "Team: devteam1"
@@ -392,7 +392,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam2 should not be configured - receiver
-  collectorDeploymentReceiverDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlp/devteam2')
+  collectorDeploymentReceiverDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.exporters.otlphttp/devteam2')
   if [[ $collectorDeploymentReceiverDevteam2ExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: receiver"
     echo "Team: devteam2"
@@ -411,7 +411,7 @@ runTests() {
   fi
 
   # OTLP exporter for opsteam should be configured - sampler
-  collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlp/opsteam')
+  collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlphttp/opsteam')
   if [[ $collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck == "" && $collectorDeploymentSamplerOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: sampler"
     echo "Team: opsteam"
@@ -421,7 +421,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam1 should be configured - sampler
-  collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlp/devteam1')
+  collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlphttp/devteam1')
   if [[ $collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck == "" && $collectorDeploymentSamplerDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: sampler"
     echo "Team: devteam1"
@@ -431,7 +431,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam2 should not be configured - sampler
-  collectorDeploymentSamplerDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlp/devteam2')
+  collectorDeploymentSamplerDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.exporters.otlphttp/devteam2')
   if [[ $collectorDeploymentSamplerDevteam2ExporterOtlpConfigCheck != "null" ]]; then
     echo "Mode: sampler"
     echo "Team: devteam2"
@@ -448,7 +448,7 @@ runTests() {
   echo "Message: Testing collector pipeline configuration..."
 
   # Pipeline otlp exporter for opsteam should be configured - receiver
-  collectorDeploymentReceiverOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.service.pipelines.metrics/opsteam.exporters[]' | yq 'select("otlp/opsteam")')
+  collectorDeploymentReceiverOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.service.pipelines.metrics/opsteam.exporters[]' | yq 'select("otlphttp/opsteam")')
   if [[ $collectorDeploymentReceiverOpsteamPipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Mode: receiver"
     echo "Team: opsteam"
@@ -470,7 +470,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam1 should be configured - receiver
-  collectorDeploymentReceiverDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.service.pipelines.metrics/devteam1.exporters[]' | yq 'select("otlp/devteam1")')
+  collectorDeploymentReceiverDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.service.pipelines.metrics/devteam1.exporters[]' | yq 'select("otlphttp/devteam1")')
   if [[ $collectorDeploymentReceiverDevteam1PipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Mode: receiver"
     echo "Team: devteam1"
@@ -492,7 +492,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam2 should not be configured - receiver
-  collectorDeploymentReceiverDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.service.pipelines.metrics/devteam2.exporters[]' | yq 'select("otlp/devteam2")')
+  collectorDeploymentReceiverDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.service.pipelines.metrics/devteam2.exporters[]' | yq 'select("otlphttp/devteam2")')
   if [[ $collectorDeploymentReceiverDevteam2PipelineExporterOtlpConfigCheck != "" ]]; then
     echo "Mode: receiver"
     echo "Team: devteam2"
@@ -513,7 +513,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for opsteam should be configured - sampler
-  collectorDeploymentSamplerOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.service.pipelines.traces/opsteam.exporters[]' | yq 'select("otlp/opsteam")')
+  collectorDeploymentSamplerOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.service.pipelines.traces/opsteam.exporters[]' | yq 'select("otlphttp/opsteam")')
   if [[ $collectorDeploymentSamplerOpsteamPipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Mode: sampler"
     echo "Team: opsteam"
@@ -535,7 +535,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam1 should be configured - sampler
-  collectorDeploymentSamplerDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.service.pipelines.traces/devteam1.exporters[]' | yq 'select("otlp/devteam1")')
+  collectorDeploymentSamplerDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.service.pipelines.traces/devteam1.exporters[]' | yq 'select("otlphttp/devteam1")')
   if [[ $collectorDeploymentSamplerDevteam1PipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Mode: sampler"
     echo "Team: devteam1"
@@ -557,7 +557,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam2 should not be configured - sampler
-  collectorDeploymentSamplerDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.service.pipelines.traces/devteam2.exporters[]' | yq 'select("otlp/devteam2")')
+  collectorDeploymentSamplerDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentSamplerName}'")).spec.config' | yq '.service.pipelines.traces/devteam2.exporters[]' | yq 'select("otlphttp/devteam2")')
   if [[ $collectorDeploymentSamplerDevteam2PipelineExporterOtlpConfigCheck != "" ]]; then
     echo "Mode: sampler"
     echo "Team: devteam2"
@@ -673,7 +673,7 @@ runTests() {
   echo "Message: Testing collector exporter configuration..."
 
   # OTLP exporter for opsteam should be configured
-  collectorStatefulsetOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlp/opsteam')
+  collectorStatefulsetOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlphttp/opsteam')
   if [[ $collectorStatefulsetOpsteamExporterOtlpConfigCheck == "" && $collectorStatefulsetOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -682,7 +682,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam1 should be configured
-  collectorStatefulsetDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlp/devteam1')
+  collectorStatefulsetDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlphttp/devteam1')
   if [[ $collectorStatefulsetDevteam1ExporterOtlpConfigCheck == "" && $collectorStatefulsetDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -691,7 +691,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam2 should not be configured
-  collectorStatefulsetDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlp/devteam2')
+  collectorStatefulsetDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.exporters.otlphttp/devteam2')
   if [[ $collectorStatefulsetDevteam2ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam2"
     echo "Component: otlpexporter"
@@ -707,7 +707,7 @@ runTests() {
   echo "Message: Testing collector pipeline configuration..."
 
   # Pipeline otlp exporter for opsteam should be configured
-  collectorStatefulsetOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.service.pipelines.metrics/opsteam.exporters[]' | yq 'select("otlp/opsteam")')
+  collectorStatefulsetOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.service.pipelines.metrics/opsteam.exporters[]' | yq 'select("otlphttp/opsteam")')
   if [[ $collectorStatefulsetOpsteamPipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -727,7 +727,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam1 should be configured
-  collectorStatefulsetDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.service.pipelines.metrics/devteam1.exporters[]' | yq 'select("otlp/devteam1")')
+  collectorStatefulsetDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.service.pipelines.metrics/devteam1.exporters[]' | yq 'select("otlphttp/devteam1")')
   if [[ $collectorStatefulsetDevteam1PipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -747,7 +747,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam2 should not be configured
-  collectorStatefulsetDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.service.pipelines.metrics/devteam2.exporters[]' | yq 'select("otlp/devteam2")')
+  collectorStatefulsetDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorStatefulsetName}'")).spec.config' | yq '.service.pipelines.metrics/devteam2.exporters[]' | yq 'select("otlphttp/devteam2")')
   if [[ $collectorStatefulsetDevteam2PipelineExporterOtlpConfigCheck != "" ]]; then
     echo "Team: devteam2"
     echo "Component: otlpexporter"
@@ -862,7 +862,7 @@ runTests() {
   echo "Message: Testing collector exporter configuration..."
 
   # OTLP exporter for opsteam should be configured
-  collectorSingletonOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlp/opsteam')
+  collectorSingletonOpsteamExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlphttp/opsteam')
   if [[ $collectorSingletonOpsteamExporterOtlpConfigCheck == "" && $collectorSingletonOpsteamExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -871,7 +871,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam1 should not be configured
-  collectorSingletonDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlp/devteam1')
+  collectorSingletonDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlphttp/devteam1')
   if [[ $collectorSingletonDevteam1ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -880,7 +880,7 @@ runTests() {
   fi
 
   # OTLP exporter for devteam2 should not be configured
-  collectorSingletonDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlp/devteam2')
+  collectorSingletonDevteam2ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlphttp/devteam2')
   if [[ $collectorSingletonDevteam2ExporterOtlpConfigCheck != "null" ]]; then
     echo "Team: devteam2"
     echo "Component: otlpexporter"
@@ -896,7 +896,7 @@ runTests() {
   echo "Message: Testing collector pipeline configuration..."
 
   # Pipeline otlp exporter for opsteam should be configured
-  collectorSingletonOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/opsteam.exporters[]' | yq 'select("otlp/opsteam")')
+  collectorSingletonOpsteamPipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/opsteam.exporters[]' | yq 'select("otlphttp/opsteam")')
   if [[ $collectorSingletonOpsteamPipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Team: opsteam"
     echo "Component: otlpexporter"
@@ -916,7 +916,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam1 should not be configured
-  collectorSingletonDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.exporters[]' | yq 'select("otlp/devteam1")')
+  collectorSingletonDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.exporters[]' | yq 'select("otlphttp/devteam1")')
   if [[ $collectorSingletonDevteam1PipelineExporterOtlpConfigCheck != "" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
@@ -936,7 +936,7 @@ runTests() {
   fi
 
   # Pipeline otlp exporter for devteam2 should not be configured
-  collectorSingletonDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam2.exporters[]' | yq 'select("otlp/devteam2")')
+  collectorSingletonDevteam2PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam2.exporters[]' | yq 'select("otlphttp/devteam2")')
   if [[ $collectorSingletonDevteam2PipelineExporterOtlpConfigCheck != "" ]]; then
     echo "Team: devteam2"
     echo "Component: otlpexporter"
@@ -956,7 +956,7 @@ if [[ $case == "global" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
-    --set global.newrelic.endpoint="otlp.nr-data.net:4317" \
+    --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.value="value_ops" \
     --set global.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
     --set global.newrelic.teams.devteam1.namespaces[0]="devteam1" \
@@ -975,39 +975,39 @@ if [[ $case == "individual" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set daemonset.newrelic.teams.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set daemonset.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set daemonset.newrelic.teams.opsteam.licenseKey.value="value_ops" \
-    --set daemonset.newrelic.teams.devteam1.endpoint="otlp.nr-data.net:4317" \
+    --set daemonset.newrelic.teams.devteam1.endpoint="https://otlp.nr-data.net" \
     --set daemonset.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
     --set daemonset.newrelic.teams.devteam1.namespaces[0]="devteam1" \
-    --set daemonset.newrelic.teams.devteam2.endpoint="otlp.nr-data.net:4317" \
+    --set daemonset.newrelic.teams.devteam2.endpoint="https://otlp.nr-data.net" \
     --set daemonset.newrelic.teams.devteam2.licenseKey.value="value_dev2" \
     --set daemonset.newrelic.teams.devteam2.namespaces[0]="devteam2" \
     --set daemonset.newrelic.teams.devteam2.ignore=true \
-    --set deployment.newrelic.teams.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set deployment.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set deployment.newrelic.teams.opsteam.licenseKey.value="value_ops" \
-    --set deployment.newrelic.teams.devteam1.endpoint="otlp.nr-data.net:4317" \
+    --set deployment.newrelic.teams.devteam1.endpoint="https://otlp.nr-data.net" \
     --set deployment.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
     --set deployment.newrelic.teams.devteam1.namespaces[0]="devteam1" \
-    --set deployment.newrelic.teams.devteam2.endpoint="otlp.nr-data.net:4317" \
+    --set deployment.newrelic.teams.devteam2.endpoint="https://otlp.nr-data.net" \
     --set deployment.newrelic.teams.devteam2.licenseKey.value="value_dev2" \
     --set deployment.newrelic.teams.devteam2.namespaces[0]="devteam2" \
     --set deployment.newrelic.teams.devteam2.ignore=true \
-    --set statefulset.newrelic.teams.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set statefulset.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set statefulset.newrelic.teams.opsteam.licenseKey.value="value_ops" \
-    --set statefulset.newrelic.teams.devteam1.endpoint="otlp.nr-data.net:4317" \
+    --set statefulset.newrelic.teams.devteam1.endpoint="https://otlp.nr-data.net" \
     --set statefulset.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
     --set statefulset.newrelic.teams.devteam1.namespaces[0]="devteam1" \
-    --set statefulset.newrelic.teams.devteam2.endpoint="otlp.nr-data.net:4317" \
+    --set statefulset.newrelic.teams.devteam2.endpoint="https://otlp.nr-data.net" \
     --set statefulset.newrelic.teams.devteam2.licenseKey.value="value_dev2" \
     --set statefulset.newrelic.teams.devteam2.namespaces[0]="devteam2" \
     --set statefulset.newrelic.teams.devteam2.ignore=true \
-    --set singleton.newrelic.teams.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set singleton.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set singleton.newrelic.teams.opsteam.licenseKey.value="value_ops" \
-    --set singleton.newrelic.teams.devteam1.endpoint="otlp.nr-data.net:4317" \
+    --set singleton.newrelic.teams.devteam1.endpoint="https://otlp.nr-data.net" \
     --set singleton.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
     --set singleton.newrelic.teams.devteam1.namespaces[0]="devteam1" \
-    --set singleton.newrelic.teams.devteam2.endpoint="otlp.nr-data.net:4317" \
+    --set singleton.newrelic.teams.devteam2.endpoint="https://otlp.nr-data.net" \
     --set singleton.newrelic.teams.devteam2.licenseKey.value="value_dev2" \
     --set singleton.newrelic.teams.devteam2.namespaces[0]="devteam2" \
     --set singleton.newrelic.teams.devteam2.ignore=true \

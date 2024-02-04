@@ -35,9 +35,9 @@ if [[ $clusterName == "" ]]; then
 fi
 
 # New Relic OTLP endpoint
-newrelicOtlpEndpoint="otlp.nr-data.net:4317"
+newrelicOtlpEndpoint="https://otlp.nr-data.net"
 if [[ $newrelicRegion == "eu" ]]; then
-  newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
+  newrelicOtlpEndpoint="https://otlp.eu01.nr-data.net"
 fi
 
 ### Set parameters

@@ -31,9 +31,9 @@ global:
     #    and statefulset will be ignored
     enabled: true
     # OTLP endpoint for all New Relic accounts
-    # For US accounts -> otlp.nr-data.net:4317
-    # For EU accounts -> otlp.eu01.nr-data.net:4317
-    endpoint: "otlp.nr-data.net:4317"
+    # For US accounts -> https://otlp.nr-data.net
+    # For EU accounts -> https://otlp.eu01.nr-data.net
+    endpoint: "https://otlp.nr-data.net"
     # Teams to segragete the telemetry data received by all of the collectors.
     teams:
       # OPS team which is responsible for the cluster and common apps
@@ -228,9 +228,9 @@ deployment:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -252,7 +252,7 @@ deployment:
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -260,7 +260,7 @@ deployment:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -269,7 +269,7 @@ deployment:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -437,9 +437,9 @@ daemonset:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -461,7 +461,7 @@ daemonset:
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -469,7 +469,7 @@ daemonset:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -478,7 +478,7 @@ daemonset:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -829,9 +829,9 @@ statefulset:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -853,7 +853,7 @@ statefulset:
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -861,7 +861,7 @@ statefulset:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -870,7 +870,7 @@ statefulset:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -1021,9 +1021,9 @@ singleton:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -1051,7 +1051,7 @@ singleton:
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -1059,7 +1059,7 @@ singleton:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -1068,7 +1068,7 @@ singleton:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:

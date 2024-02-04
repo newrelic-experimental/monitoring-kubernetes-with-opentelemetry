@@ -12,8 +12,8 @@
     {{ fail "ERROR [DEPLOYMENT]: You have enabled traces but haven't defined any New Relic account neither in the global section nor in the deployment section to send the data to!" }}
   {{- end -}}
   {{- if .Values.global.newrelic.enabled -}}
-    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
-      {{ fail "ERROR [DEPLOYMENT]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- if and (ne .Values.global.newrelic.endpoint "https://otlp.nr-data.net") (ne .Values.global.newrelic.endpoint "https://otlp.eu01.nr-data.net") -}}
+      {{ fail "ERROR [DEPLOYMENT]: The given global OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
     {{- end -}}
     {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
@@ -41,8 +41,8 @@
       {{- if eq $teamName "opsteam" -}}
         {{ $isOpsteamDefined = true }}
       {{- end -}}
-      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
-        {{ fail "ERROR [DEPLOYMENT]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- if and (ne $teamInfo.endpoint "https://otlp.nr-data.net") (ne $teamInfo.endpoint "https://otlp.eu01.nr-data.net") -}}
+        {{ fail "ERROR [DEPLOYMENT]: The given OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
       {{- end -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
         {{ fail "ERROR [DEPLOYMENT]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
@@ -67,8 +67,8 @@ Traces are enabled. Deployments of OTel collectors are deployed.
     {{ fail "ERROR [DAEMONSET]: You have enabled logs but haven't defined any New Relic account neither in the global section nor in the daemonset section to send the data to!" }}
   {{- end -}}
   {{- if .Values.global.newrelic.enabled -}}
-    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
-      {{ fail "ERROR [DAEMONSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- if and (ne .Values.global.newrelic.endpoint "https://otlp.nr-data.net") (ne .Values.global.newrelic.endpoint "https://otlp.eu01.nr-data.net") -}}
+      {{ fail "ERROR [DAEMONSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
     {{- end -}}
     {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
@@ -96,8 +96,8 @@ Traces are enabled. Deployments of OTel collectors are deployed.
       {{- if eq $teamName "opsteam" -}}
         {{ $isOpsteamDefined = true }}
       {{- end -}}
-      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
-        {{ fail "ERROR [DAEMONSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- if and (ne $teamInfo.endpoint "https://otlp.nr-data.net") (ne $teamInfo.endpoint "https://otlp.eu01.nr-data.net") -}}
+        {{ fail "ERROR [DAEMONSET]: The given OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
       {{- end -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
         {{ fail "ERROR [DAEMONSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
@@ -122,8 +122,8 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
     {{ fail "ERROR [STATEFULSET]: You have enabled metrics but haven't defined any New Relic account neither in the global section nor in the statefulet section to send the data to!" }}
   {{- end -}}
   {{- if .Values.global.newrelic.enabled -}}
-    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
-      {{ fail "ERROR [STATEFULSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- if and (ne .Values.global.newrelic.endpoint "https://otlp.nr-data.net") (ne .Values.global.newrelic.endpoint "https://otlp.eu01.nr-data.net") -}}
+      {{ fail "ERROR [STATEFULSET]: The given global OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
     {{- end -}}
     {{- $isOpsteamDefined := false }}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
@@ -151,8 +151,8 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
       {{- if eq $teamName "opsteam" -}}
         {{ $isOpsteamDefined = true }}
       {{- end -}}
-      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
-        {{ fail "ERROR [STATEFULSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- if and (ne $teamInfo.endpoint "https://otlp.nr-data.net") (ne $teamInfo.endpoint "https://otlp.eu01.nr-data.net") -}}
+        {{ fail "ERROR [STATEFULSET]: The given OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
       {{- end -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
         {{ fail "ERROR [STATEFULSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
@@ -177,8 +177,8 @@ Metrics are enabled. Statefulset of OTel collectors are deployed.
     {{ fail "ERROR [SINGLETON]: You have enabled events but haven't defined any New Relic account neither in the global section nor in the singleton section to send the data to!" }}
   {{- end -}}
   {{- if .Values.global.newrelic.enabled -}}
-    {{- if and (ne .Values.global.newrelic.endpoint "otlp.nr-data.net:4317") (ne .Values.global.newrelic.endpoint "otlp.eu01.nr-data.net:4317") -}}
-      {{ fail "ERROR [SINGLETON]: The given global OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+    {{- if and (ne .Values.global.newrelic.endpoint "https://otlp.nr-data.net") (ne .Values.global.newrelic.endpoint "https://otlp.eu01.nr-data.net") -}}
+      {{ fail "ERROR [SINGLETON]: The given global OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
     {{- end -}}
     {{- range $teamName, $teamInfo := .Values.global.newrelic.teams -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
@@ -195,8 +195,8 @@ Metrics are enabled. Statefulset of OTel collectors are deployed.
     {{- end }}
   {{- else -}}
     {{- range $teamName, $teamInfo := .Values.singleton.newrelic.teams -}}
-      {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
-        {{ fail "ERROR [SINGLETON]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{- if and (ne $teamInfo.endpoint "https://otlp.nr-data.net") (ne $teamInfo.endpoint "https://otlp.eu01.nr-data.net") -}}
+        {{ fail "ERROR [SINGLETON]: The given OTLP enpoint is incorrect. Valid values: For US -> https://otlp.nr-data.net or for EU -> https://otlp.eu01.nr-data.net" }}
       {{- end -}}
       {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
         {{ fail "ERROR [SINGLETON]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
