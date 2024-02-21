@@ -690,7 +690,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 40
+        size_in_percentage: {{ .Values.singleton.extensions.memory_ballast.size_in_percentage }}
 
     service:
       extensions:

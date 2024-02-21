@@ -260,7 +260,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 40
+        size_in_percentage: {{ .Values.daemonset.extensions.memory_ballast.size_in_percentage }}
 
     service:
       extensions:
