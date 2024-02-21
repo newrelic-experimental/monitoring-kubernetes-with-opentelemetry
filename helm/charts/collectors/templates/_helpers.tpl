@@ -66,6 +66,13 @@ Set name for deployment collectors.
 {{- end -}}
 
 {{/*
+Set name for target allocator.
+*/}}
+{{- define "nrotel.targetAllocatorName" -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "sts-targetallocator" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Set name for daemonset collectors.
 */}}
 {{- define "nrotel.daemonsetName" -}}

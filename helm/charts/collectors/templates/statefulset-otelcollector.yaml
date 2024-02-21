@@ -492,7 +492,7 @@ spec:
                   replacement: $$1:$$2
                 - source_labels: [__meta_kubernetes_service_name]
                   action: keep
-                  regex: {{ printf "%s-sts-targetallocator" .Chart.Name }}
+                  regex: {{ include "nrotel.targetAllocatorName" . }}
                 - source_labels: [__meta_kubernetes_namespace]
                   action: replace
                   target_label: namespace
