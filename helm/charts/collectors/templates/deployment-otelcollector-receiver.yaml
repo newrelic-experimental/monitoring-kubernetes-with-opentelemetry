@@ -254,7 +254,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 40
+        size_in_percentage: {{ .Values.deployment.extensions.memory_ballast.receiver.size_in_percentage }}
 
     service:
       extensions:
