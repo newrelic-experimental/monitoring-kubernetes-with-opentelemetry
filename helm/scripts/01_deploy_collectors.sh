@@ -63,9 +63,9 @@ otelcollectors["namespace"]="monitoring"
 ### Deploy Helm ###
 ###################
 
-echo "##################"
+echo "##########"
 echo "### CASE $case ###"
-echo "##################"
+echo "##########"
 
 ### CASE 01 ###
 # Global configuration enabled: true
