@@ -784,9 +784,9 @@ runTests() {
 
   # Secret for devteam1 should not be created
   secretSingletonDevteam1Check=$(echo "$helmTemplate" | yq 'select((.kind == "Secret") and (.metadata.name == "'${secretSingletonDevteam1Name}'")).metadata.name')
-  if [[ $secretSingletonDevteam1Check != "" ]]; then
+  if [[ $secretSingletonDevteam1Check != $secretSingletonDevteam1Name ]]; then
     echo "Team: devteam1"
-    echo "Message: Secret should not have been created but it has!"
+    echo "Message: Secret should have been created but it has not!"
     exit 1
   fi
 
@@ -815,9 +815,9 @@ runTests() {
 
   # Secret for devteam1 should not be assigned
   collectorSingletonDevteam1EnvVarCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.env[] | select(.valueFrom.secretKeyRef.name == "'${secretSingletonDevteam1Name}'").valueFrom.secretKeyRef.name')
-  if [[ $collectorSingletonDevteam1EnvVarCheck != "" ]]; then
+  if [[ $collectorSingletonDevteam1EnvVarCheck != $secretSingletonDevteam1Name ]]; then
     echo "Team: devteam1"
-    echo "Message: Environment variable should not have been assigned but it has!"
+    echo "Message: Environment variable should have been assigned but it has not!"
     exit 1
   fi
 
@@ -838,7 +838,7 @@ runTests() {
 
   # Filter processor for devteam1 should not be configured
   collectorSingletonDevteam1ProcessorFilterConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.processors.filter/devteam1')
-  if [[ $collectorSingletonDevteam1ProcessorFilterConfigCheck != "null" ]]; then
+  if [[ $collectorSingletonDevteam1ProcessorFilterConfigCheck == "" ]]; then
     echo "Team: devteam1"
     echo "Component: filterprocessor"
     echo "Processor should be configured but it has not!"
@@ -872,10 +872,10 @@ runTests() {
 
   # OTLP exporter for devteam1 should not be configured
   collectorSingletonDevteam1ExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.exporters.otlphttp/devteam1')
-  if [[ $collectorSingletonDevteam1ExporterOtlpConfigCheck != "null" ]]; then
+  if [[ $collectorSingletonDevteam1ExporterOtlpConfigCheck == "" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
-    echo "Message: Exporter should not be configured but it has!"
+    echo "Message: Exporter should be configured but it has not!"
     exit 1
   fi
 
@@ -907,21 +907,21 @@ runTests() {
 
   # Pipeline filter processor for devteam1 should not be configured
   collectorSingletonDevteam1PipelineProcessorFilterConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.processors[]' | yq 'select("filter/devteam1")')
-  if [[ $collectorSingletonDevteam1PipelineProcessorFilterConfigCheck != "" ]]; then
+  if [[ $collectorSingletonDevteam1PipelineProcessorFilterConfigCheck == "" ]]; then
     echo "Team: devteam1"
     echo "Component: filterprocessor"
     echo "Telemetry: logs"
-    echo "Message: Pipeline should not be configured but it has!"
+    echo "Message: Pipeline should be configured but it has not!"
     exit 1
   fi
 
   # Pipeline otlp exporter for devteam1 should not be configured
   collectorSingletonDevteam1PipelineExporterOtlpConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorSingletonName}'")).spec.config' | yq '.service.pipelines.logs/devteam1.exporters[]' | yq 'select("otlphttp/devteam1")')
-  if [[ $collectorSingletonDevteam1PipelineExporterOtlpConfigCheck != "" ]]; then
+  if [[ $collectorSingletonDevteam1PipelineExporterOtlpConfigCheck == "" ]]; then
     echo "Team: devteam1"
     echo "Component: otlpexporter"
     echo "Telemetry: logs"
-    echo "Message: Pipeline should not be configured but it has!"
+    echo "Message: Pipeline should be configured but it has not!"
     exit 1
   fi
 

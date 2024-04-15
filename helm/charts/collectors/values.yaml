@@ -1072,12 +1072,9 @@ singleton:
           secretRef: null
             # name: ""
             # key: ""
-        ###################################################################
-        ### Namespaced filtering does not work for events at the moment ###
-        ###################################################################
         # Namespaces to filter the gathered telemetry data
         # -> If nothing is defined, all telemetry data will be sent
-        # namespaces: []
+        namespaces: []
 
       ###################################################################
       ### Multi-account export does not work for events at the moment ###
