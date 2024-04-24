@@ -1,4 +1,122 @@
 {{- if eq .Values.metrics.enabled true -}}
+
+{{/*
+  Depending on which config setting is used (global.enabled), create one "teams"
+  variable to loop over.
+*/}}
+{{- $teams := dict -}}
+{{- if .Values.global.newrelic.enabled }}
+  {{- $teams = .Values.global.newrelic.teams }}
+  {{/*
+    "global" setting does not have the endpoint field on every team info. In order to
+    loop without if/else cases, add the endpoint to every team info.
+  */}}
+  {{- range $teamName, $teamInfo := $teams }}
+    {{- $_ := set $teamInfo "endpoint" $.Values.global.newrelic.endpoint }}
+  {{- end }}
+{{- else -}}
+  {{- $teams = .Values.statefulset.newrelic.teams }}
+{{- end -}}
+
+{{/*
+  Set the namespaced filtering conditions only if
+  - team is not marked as "ignore"
+  - team has namespaces defined
+*/}}
+{{- range $teamName, $teamInfo := $teams }}
+  {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
+    {{/*
+      The scrape jobs
+      - "kubernetes-nodes-cadvisor"
+      - "kubernetes-kube-state-metrics" 
+      have the relevant namespace info under the "namespace" attribute. Set the namespace
+      filter conditions.
+    */}}
+    {{- $conditionForNamespace := "" -}}
+    {{- range $index, $namespace := $teamInfo.namespaces -}}
+      {{- if eq $index 0 -}}
+        {{- $conditionForNamespace = printf "not (IsMatch(attributes[\"namespace\"], \"%s\"))" $namespace -}}
+      {{ else }}
+        {{- $conditionForNamespace = printf "%s and not (IsMatch(attributes[\"namespace\"], \"%s\"))" $conditionForNamespace $namespace -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{/*
+      Now, merge these conditions with the scrape job names. Scrape job names are added into
+      the "service.name" attribute.
+    */}}
+    {{ $baseFilterConditionForNamespace := "" -}}
+    {{- $scrapeJobsForNamespace := list "kubernetes-nodes-cadvisor" "kubernetes-kube-state-metrics" -}}
+    {{- range $index, $scrapeJobName := $scrapeJobsForNamespace -}}
+      {{- if eq $index 0 -}}
+        {{- $baseFilterConditionForNamespace = printf "(resource.attributes[\"service.name\"] != \"%s\" or (%s))" $scrapeJobName $conditionForNamespace -}}
+      {{ else }}
+        {{- $baseFilterConditionForNamespace = printf "%s and (resource.attributes[\"service.name\"] != \"%s\" or (%s)" $baseFilterConditionForNamespace $scrapeJobName $conditionForNamespace -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{/*
+      The scrape jobs
+      - "kubernetes-apiservers"
+      - "kubernetes-coredns"
+      - "kubernetes-node-exporter"
+      - "kubernetes-service-endpoints"
+      - and all from the "extraScrapeConfigs"
+      have the relevant namespace info under the "k8s.namespace.name" attribute. Set the namespace
+      filter conditions.
+    */}}
+    {{ $conditionForK8sNamespaceName := "" -}}
+    {{- range $index, $namespace := $teamInfo.namespaces -}}
+      {{- if eq $index 0 -}}
+        {{- $conditionForK8sNamespaceName = printf "not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $namespace -}}
+      {{ else }}
+        {{- $conditionForK8sNamespaceName = printf "%s and not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $conditionForK8sNamespaceName $namespace -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{/*
+      Now, merge these conditions with the scrape job names. Scrape job names are added into
+      the "service.name" attribute.
+    */}}
+    {{ $baseFilterConditionForK8sNamespaceName := "" -}}
+    {{- $scrapeJobsForK8sNamespaceName := list "kubernetes-apiservers" "kubernetes-coredns" "kubernetes-node-exporter" "kubernetes-service-endpoints" -}}
+    {{/*
+      TODO: Append this list with job names from extraScrapeConfigs.
+    */}}
+    {{- range $index, $scrapeJobName := $scrapeJobsForK8sNamespaceName -}}
+      {{- if eq $index 0 -}}
+        {{- $baseFilterConditionForK8sNamespaceName = printf "(resource.attributes[\"service.name\"] != \"%s\" or (%s))" $scrapeJobName $conditionForK8sNamespaceName -}}
+      {{ else }}
+        {{- $baseFilterConditionForK8sNamespaceName = printf "%s and (resource.attributes[\"service.name\"] != \"%s\" or (%s))" $baseFilterConditionForK8sNamespaceName $scrapeJobName $conditionForK8sNamespaceName -}}
+      {{- end -}}
+    {{- end -}}
+
+
+    {{/*
+      Merge both conditions for "namespace" and "k8s.namespace.name".
+      Set the filter condition to the relevant team.
+    */}}
+    {{ $baseFilterCondition := printf "%s and %s" $baseFilterConditionForNamespace $baseFilterConditionForK8sNamespaceName -}}
+    
+    {{/*
+      If it's the opsteam, add the "kubernetes-nodes" job.
+    */}}
+    {{- if eq $teamName "opsteam" }}
+      {{ $baseFilterCondition = printf "'%s and (resource.attributes[\"service.name\"] != \"kubernetes-nodes\"))'" $baseFilterCondition }}
+    {{- else }}
+      {{ $baseFilterCondition = printf "'%s'" $baseFilterCondition }}
+    {{- end }}
+    {{- $_ := set $teamInfo "filter" $baseFilterCondition }}
+  {{- end }}
+{{- end }}
+
+{{/*
+For debugging the teams config output.
+# {{- with $teams }}
+# teamsConfig: {{ toYaml . | nindent 2 }}
+# {{- end }}
+*/}}
+
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
@@ -70,28 +188,7 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
-  {{- if .Values.global.newrelic.enabled }}
-    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
-      {{- if ne $teamInfo.ignore true }}
-    - name: {{ $teamName }}-endpoint
-      value: {{ $.Values.global.newrelic.endpoint }}
-        {{- if $teamInfo.licenseKey.secretRef }}
-    - name: {{ $teamName }}-licenseKey
-      valueFrom:
-        secretKeyRef:
-          name: {{ $teamInfo.licenseKey.secretRef.name }}
-          key: {{ $teamInfo.licenseKey.secretRef.key }}
-        {{- else if $teamInfo.licenseKey.value }}
-    - name: {{ $teamName }}-licenseKey
-      valueFrom:
-        secretKeyRef:
-          name: {{ include "nrotel.statefulsetName" $ }}-{{ $teamName }}
-          key: licenseKey
-        {{- end }}
-      {{- end }}
-    {{- end }}
-  {{- else }}
-    {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
+    {{- range $teamName, $teamInfo := $teams }}
       {{- if ne $teamInfo.ignore true }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
@@ -110,7 +207,6 @@ spec:
         {{- end }}
       {{- end }}
     {{- end }}
-  {{- end }}
 
   # Otel configuration
   config: |
@@ -525,6 +621,7 @@ spec:
             {{ end }}
 
     processors:
+
       resourcedetection:
         detectors: [env, azure]
         azure:
@@ -549,6 +646,7 @@ spec:
               enabled: false
             azure.resourcegroup.name:
               enabled: false
+
       k8sattributes:
         extract:
           metadata:
@@ -565,11 +663,13 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
+
       attributes:
         actions:
           - key: k8s.cluster.name
             value: {{ .Values.clusterName }}
             action: upsert
+
       resource:
         attributes:
           - key: vm.type
@@ -577,6 +677,7 @@ spec:
             from_attribute: azure.vm.size
           - key: azure.vm.size
             action: delete
+
       attributes/self:
         actions:
           - key: otelcollector.type
@@ -591,81 +692,22 @@ spec:
           - key: k8s.pod.name
             value: $MY_POD_NAME
             action: upsert
-      {{- if .Values.global.newrelic.enabled }}
-        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
-          {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
-      filter/{{ $teamName }}:
-        error_mode: ignore
-        metrics:
-          datapoint:
-          {{- $conditionForNamespace := "" -}}
-          {{- range $index, $namespace := $teamInfo.namespaces -}}
-            {{- if eq $index 0 -}}
-              {{- $conditionForNamespace = printf "not (IsMatch(attributes[\"namespace\"], \"%s\"))" $namespace -}}
-            {{ else }}
-              {{- $conditionForNamespace = printf "%s and not (IsMatch(attributes[\"namespace\"], \"%s\"))" $conditionForNamespace $namespace -}}
-            {{- end -}}
-          {{- end -}}
-          {{ $conditionForK8sNamespaceName := "" -}}
-          {{- range $index, $namespace := $teamInfo.namespaces -}}
-            {{- if eq $index 0 -}}
-              {{- $conditionForK8sNamespaceName = printf "not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $namespace -}}
-            {{ else }}
-              {{- $conditionForK8sNamespaceName = printf "%s and not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $conditionForK8sNamespaceName $namespace -}}
-            {{- end -}}
-          {{- end -}}
-          {{ $baseFilterCondition := "" -}}
-          {{- $baseScrapeJobs := list "kubernetes-apiservers" "kubernetes-coredns" "kubernetes-nodes-cadvisor" "kubernetes-kube-state-metrics" "kubernetes-node-exporter" "kubernetes-service-endpoints" -}}
-          {{- range $index, $scrapeJobName := $baseScrapeJobs -}}
-            {{- if eq $index 0 -}}
-              {{- $baseFilterCondition = printf "(resource.attributes[\"service.name\"] != \"%s\" or ({{ $conditionForNamespace }}))" $scrapeJobName -}}
-            {{ else }}
-              {{- $baseFilterCondition = printf "%s and (resource.attributes[\"service.name\"] != \"%s\" or ({{ $conditionForNamespace }}))" $baseFilterCondition $scrapeJobName -}}
-            {{- end -}}
-          {{- end -}}
 
-          {{- if eq $teamName "opsteam" }}
-            - {{ printf "'%s and (resource.attributes[\"service.name\"] != \"kubernetes-nodes\"))'" $baseFilterCondition }}
-          {{ else }}
-            - {{ printf "'%s'" $baseFilterCondition }}
-          {{- end }}
-          {{- end }}
-        {{- end }}
-      {{- else }}
-        {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
-          {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
+      {{- range $teamName, $teamInfo := $teams }}
+        {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
       filter/{{ $teamName }}:
         error_mode: ignore
         metrics:
           datapoint:
-          {{ $conditionForNamespace := "" -}}
-          {{- range $index, $namespace := $teamInfo.namespaces -}}
-            {{- if eq $index 0 -}}
-              {{- $conditionForNamespace = printf "not (IsMatch(attributes[\"namespace\"], \"%s\"))" $namespace -}}
-            {{ else }}
-              {{- $conditionForNamespace = printf "%s and not (IsMatch(attributes[\"namespace\"], \"%s\"))" $conditionForNamespace $namespace -}}
-            {{- end -}}
-          {{- end -}}
-          {{ $conditionForK8sNamespaceName := "" -}}
-          {{- range $index, $namespace := $teamInfo.namespaces -}}
-            {{- if eq $index 0 -}}
-              {{- $conditionForK8sNamespaceName = printf "not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $namespace -}}
-            {{ else }}
-              {{- $conditionForK8sNamespaceName = printf "%s and not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $conditionForK8sNamespaceName $namespace -}}
-            {{- end -}}
-          {{- end -}}
-          {{- if eq $teamName "opsteam" }}
-            - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-pods" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}) and (resource.attributes["service.name"] != "kubernetes-nodes"))'
-          {{ else }}
-            - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-pods" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
-          {{- end }}
-          {{- end }}
+            - {{ $teamInfo.filter }}
         {{- end }}
       {{- end }}
+
       memory_limiter:
          check_interval: 1s
          limit_percentage: 80
          spike_limit_percentage: 25
+
       batch:
         send_batch_max_size: 1000
         timeout: 30s
