@@ -51,7 +51,7 @@
       {{- if eq $index 0 -}}
         {{- $baseFilterConditionForNamespace = printf "(resource.attributes[\"service.name\"] != \"%s\" or (%s))" $scrapeJobName $conditionForNamespace -}}
       {{ else }}
-        {{- $baseFilterConditionForNamespace = printf "%s and (resource.attributes[\"service.name\"] != \"%s\" or (%s)" $baseFilterConditionForNamespace $scrapeJobName $conditionForNamespace -}}
+        {{- $baseFilterConditionForNamespace = printf "%s and (resource.attributes[\"service.name\"] != \"%s\" or (%s))" $baseFilterConditionForNamespace $scrapeJobName $conditionForNamespace -}}
       {{- end -}}
     {{- end -}}
 
