@@ -91,7 +91,6 @@
       {{- end -}}
     {{- end -}}
 
-
     {{/*
       Merge both conditions for "namespace" and "k8s.namespace.name".
       Set the filter condition to the relevant team.
@@ -714,8 +713,8 @@ spec:
         send_batch_size : 800
 
     exporters:
-    {{- if .Values.global.newrelic.enabled }}
-      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+
+      {{- range $teamName, $teamInfo := $teams }}
         {{- if ne $teamInfo.ignore true }}
       otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
@@ -725,32 +724,25 @@ spec:
           api-key: ${env:{{ $teamName }}-licenseKey}
         {{- end }}
       {{- end }}
-    {{- else }}
-      {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
-        {{- if ne $teamInfo.ignore true }}
-      otlphttp/{{ $teamName }}:
-        endpoint: ${env:{{ $teamName }}-endpoint}
-        tls:
-          insecure: false
-        headers:
-          api-key: ${env:{{ $teamName }}-licenseKey}
-        {{- end }}
-      {{- end }}
-    {{- end }}
+
       logging:
         # verbosity: detailed
 
     extensions:
       memory_ballast:
-        size_in_percentage: {{ .Values.singleton.extensions.memory_ballast.size_in_percentage }}
+        size_in_percentage: {{ .Values.statefulset.extensions.memory_ballast.size_in_percentage }}
 
     service:
+
       extensions:
         - memory_ballast
+
       pipelines:
+
         metrics/self:
           receivers:
             - prometheus/self
+
           processors:
             - memory_limiter
             - resourcedetection
@@ -759,11 +751,12 @@ spec:
             - resource
             - attributes/self
             - batch
+
           exporters:
             - otlphttp/opsteam
             # - logging
-      {{- if .Values.global.newrelic.enabled }}
-        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+
+        {{- range $teamName, $teamInfo := $teams }}
           {{- if ne $teamInfo.ignore true }}
         metrics/{{ $teamName }}:
           receivers:
@@ -783,28 +776,7 @@ spec:
             # - logging
           {{- end }}
         {{- end }}
-      {{- else }}
-        {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams }}
-          {{- if ne $teamInfo.ignore true }}
-        metrics/{{ $teamName }}:
-          receivers:
-            - prometheus
-          processors:
-            - memory_limiter
-            - resourcedetection
-            - k8sattributes
-            - attributes
-            - resource
-          {{- if ne (len $teamInfo.namespaces) 0 }}
-            - filter/{{ $teamName }}
-          {{- end }}
-            - batch
-          exporters:
-            - otlphttp/{{ $teamName }}
-            # - logging
-          {{- end }}
-        {{- end }}
-      {{- end }}
+
       telemetry:
         # logs:
         #   level: DEBUG
