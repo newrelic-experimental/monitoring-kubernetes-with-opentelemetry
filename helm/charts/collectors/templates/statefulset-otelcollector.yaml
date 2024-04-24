@@ -598,7 +598,7 @@ spec:
         error_mode: ignore
         metrics:
           datapoint:
-          {{ $conditionForNamespace := "" -}}
+          {{- $conditionForNamespace := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
               {{- $conditionForNamespace = printf "not (IsMatch(attributes[\"namespace\"], \"%s\"))" $namespace -}}
@@ -614,10 +614,20 @@ spec:
               {{- $conditionForK8sNamespaceName = printf "%s and not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $conditionForK8sNamespaceName $namespace -}}
             {{- end -}}
           {{- end -}}
+          {{ $baseFilterCondition := "" -}}
+          {{- $baseScrapeJobs := list "kubernetes-apiservers" "kubernetes-coredns" "kubernetes-nodes-cadvisor" "kubernetes-kube-state-metrics" "kubernetes-node-exporter" "kubernetes-service-endpoints" -}}
+          {{- range $index, $scrapeJobName := $baseScrapeJobs -}}
+            {{- if eq $index 0 -}}
+              {{- $baseFilterCondition = printf "(resource.attributes[\"service.name\"] != \"%s\" or ({{ $conditionForNamespace }}))" $scrapeJobName -}}
+            {{ else }}
+              {{- $baseFilterCondition = printf "%s and (resource.attributes[\"service.name\"] != \"%s\" or ({{ $conditionForNamespace }}))" $baseFilterCondition $scrapeJobName -}}
+            {{- end -}}
+          {{- end -}}
+
           {{- if eq $teamName "opsteam" }}
-            - '(resource.attributes["service.name"] != "kubernetes-nodes") and (resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-pods" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
+            - {{ printf "'%s and (resource.attributes[\"service.name\"] != \"kubernetes-nodes\"))'" $baseFilterCondition }}
           {{ else }}
-            - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-pods" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
+            - {{ printf "'%s'" $baseFilterCondition }}
           {{- end }}
           {{- end }}
         {{- end }}
@@ -645,7 +655,7 @@ spec:
             {{- end -}}
           {{- end -}}
           {{- if eq $teamName "opsteam" }}
-            - '(resource.attributes["service.name"] != "kubernetes-nodes") and (resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-pods" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
+            - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-pods" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}) and (resource.attributes["service.name"] != "kubernetes-nodes"))'
           {{ else }}
             - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-node-exporter" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-pods" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-apiservers" or ({{ $conditionForK8sNamespaceName }})) and (resource.attributes["service.name"] != "kubernetes-coredns" or ({{ $conditionForK8sNamespaceName }}))'
           {{- end }}
