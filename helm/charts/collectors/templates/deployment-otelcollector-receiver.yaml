@@ -158,6 +158,15 @@ spec:
           - k8s.pod.name
           - k8s.pod.uid
           - k8s.pod.start_time
+
+          {{- with .Values.deployment.processors.receiver.k8sattributes.labels }}
+          labels: {{ toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.deployment.processors.receiver.k8sattributes.annotations }}
+          annotations: {{ toYaml . | nindent 12 }}
+          {{- end }}
+
         passthrough: false
         pod_association:
         - sources:
