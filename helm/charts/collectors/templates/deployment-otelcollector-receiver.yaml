@@ -146,7 +146,6 @@ spec:
 
     processors:
       k8sattributes:
-        k8sattributes:
         extract:
           metadata:
           - k8s.namespace.name
