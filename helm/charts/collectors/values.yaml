@@ -246,6 +246,17 @@ deployment:
           # - otelcol_exporter_refused_spans
           # - otelcol_exporter_refused_log_records
 
+  # Specific collector processor configuration
+  processors:
+    # Receiver collector
+    receiver:
+      # K8s attributes processor labels & annotations config
+      k8sattributes:
+        # Labels
+        labels: []
+        # Annotations
+        annotations: []
+
   # Specific collector extension configuration
   extensions:
     # Memory ballast
@@ -403,6 +414,15 @@ daemonset:
         # - otelcol_exporter_refused_metric_points
         # - otelcol_exporter_refused_spans
         # - otelcol_exporter_refused_log_records
+
+  # Specific collector processor configuration
+  processors:
+    # K8s attributes processor labels & annotations config
+    k8sattributes:
+      # Labels
+      labels: []
+      # Annotations
+      annotations: []
 
   # Specific collector extension configuration
   extensions:
@@ -882,6 +902,15 @@ statefulset:
           - source_labels: [__meta_kubernetes_pod_node_name]
             action: replace
             target_label: node
+
+  # Specific collector processor configuration
+  processors:
+    # K8s attributes processor labels & annotations config
+    k8sattributes:
+      # Labels
+      labels: []
+      # Annotations
+      annotations: []
 
   # Specific collector extension configuration
   extensions:
