@@ -80,9 +80,9 @@
     */}}
     {{ $baseFilterConditionForK8sNamespaceName := "" -}}
     {{- $scrapeJobsForK8sNamespaceName := list "kubernetes-apiservers" "kubernetes-coredns" "kubernetes-node-exporter" "kubernetes-service-endpoints" -}}
-    {{/*
-      TODO: Append this list with job names from extraScrapeConfigs.
-    */}}
+    {{- range $index, $job := $.Values.statefulset.prometheus.extraScrapeJobs -}}
+      {{ $scrapeJobsForK8sNamespaceName = append $scrapeJobsForK8sNamespaceName $job.job_name }}
+    {{- end }}
     {{- range $index, $scrapeJobName := $scrapeJobsForK8sNamespaceName -}}
       {{- if eq $index 0 -}}
         {{- $baseFilterConditionForK8sNamespaceName = printf "(resource.attributes[\"service.name\"] != \"%s\" or (%s))" $scrapeJobName $conditionForK8sNamespaceName -}}
