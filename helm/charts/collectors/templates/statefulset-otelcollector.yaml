@@ -126,9 +126,6 @@ spec:
   # Mode
   mode: "statefulset"
 
-  # Replicas
-  replicas: {{ .Values.statefulset.replicas }}
-
   # Service Account
   serviceAccount: {{ include "nrotel.statefulsetName" . }}
 
@@ -172,6 +169,18 @@ spec:
     limits:
       cpu: {{ .Values.statefulset.resources.limits.cpu }}
       memory: {{ .Values.statefulset.resources.limits.memory }}
+
+  # Replicas
+  replicas: {{ .Values.statefulset.replicas }}
+
+  # Autoscaling configuration
+  {{- if eq .Values.statefulset.autoscaler.enabled true }}
+  autoscaler:
+    minReplicas: {{ .Values.statefulset.autoscaler.minReplicas }}
+    maxReplicas: {{ .Values.statefulset.autoscaler.maxReplicas }}
+    targetCPUUtilization: {{ .Values.statefulset.autoscaler.targetCPUUtilization }}
+    targetMemoryUtilization: {{ .Values.statefulset.autoscaler.targetMemoryUtilization }}
+  {{- end }}
 
   # Environment variables
   env:

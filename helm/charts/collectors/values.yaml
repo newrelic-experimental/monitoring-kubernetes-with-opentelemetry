@@ -112,13 +112,6 @@ deployment:
     # Image tag
     tag: ""
 
-  # Number of replicas
-  replicas:
-    # Receiver collectors
-    receiver: 1
-    # Sampler collectors
-    sampler: 1
-
   # Service account
   serviceAccount:
     # Annotations to add to the service account
@@ -166,10 +159,44 @@ deployment:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi
+
+  # Number of replicas
+  replicas:
+    # Receiver collectors
+    receiver: 1
+    # Sampler collectors
+    sampler: 1
+
+  # Autoscaling configuration. Update according to your own use case.
+  autoscaler:
+    # Receiver collectors
+    receiver:
+      # Flag whether HPA should be enabled
+      enabled: true
+      # Number of minimum available replicas
+      minReplicas: 1
+      # Number of maximum available replicas
+      maxReplicas: 4
+      # Target CPU utilization to keep amongst the replicas
+      targetCPUUtilization: 70
+      # Target MEM utilization to keep amongst the replicas
+      targetMemoryUtilization: 70
+    # Sampler collectors
+    sampler:
+      # Flag whether HPA should be enabled
+      enabled: true
+      # Number of minimum available replicas
+      minReplicas: 1
+      # Number of maximum available replicas
+      maxReplicas: 4
+      # Target CPU utilization to keep amongst the replicas
+      targetCPUUtilization: 70
+      # Target MEM utilization to keep amongst the replicas
+      targetMemoryUtilization: 70
 
   # Specific Prometheus configuration
   prometheus:
@@ -349,7 +376,7 @@ daemonset:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi
@@ -518,9 +545,6 @@ statefulset:
     # Image tag
     tag: ""
 
-  # Number of replicas
-  replicas: 2
-
   # Service account
   serviceAccount:
     # Annotations to add to the service account
@@ -626,10 +650,26 @@ statefulset:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi
+
+  # Number of replicas
+  replicas: 2
+
+  # Autoscaling configuration. Update according to your own use case.
+  autoscaler:
+    # Flag whether HPA should be enabled
+    enabled: true
+    # Number of minimum available replicas
+    minReplicas: 1
+    # Number of maximum available replicas
+    maxReplicas: 4
+    # Target CPU utilization to keep amongst the replicas
+    targetCPUUtilization: 70
+    # Target MEM utilization to keep amongst the replicas
+    targetMemoryUtilization: 70
 
   # Target allocator
   targetAllocator:
@@ -1014,7 +1054,7 @@ singleton:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi

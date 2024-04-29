@@ -9,9 +9,6 @@ spec:
   # Mode
   mode: "deployment"
 
-  # Replicas
-  replicas: {{ .Values.deployment.replicas.receiver }}
-
   # Service Account
   serviceAccount: {{ include "nrotel.deploymentName" . }}
 
@@ -46,6 +43,18 @@ spec:
     limits:
       cpu: {{ .Values.deployment.resources.limits.cpu }}
       memory: {{ .Values.deployment.resources.limits.memory }}
+
+  # Replicas
+  replicas: {{ .Values.deployment.replicas.receiver }}
+
+   # Autoscaling configuration
+  {{- if eq .Values.deployment.autoscaler.receiver.enabled true }}
+  autoscaler:
+    minReplicas: {{ .Values.deployment.autoscaler.receiver.minReplicas }}
+    maxReplicas: {{ .Values.deployment.autoscaler.receiver.maxReplicas }}
+    targetCPUUtilization: {{ .Values.deployment.autoscaler.receiver.targetCPUUtilization }}
+    targetMemoryUtilization: {{ .Values.deployment.autoscaler.receiver.targetMemoryUtilization }}
+  {{- end }}
 
   # Environment variables
   env:
