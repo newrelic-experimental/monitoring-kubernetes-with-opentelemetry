@@ -31,9 +31,9 @@ global:
     #    and statefulset will be ignored
     enabled: true
     # OTLP endpoint for all New Relic accounts
-    # For US accounts -> otlp.nr-data.net:4317
-    # For EU accounts -> otlp.eu01.nr-data.net:4317
-    endpoint: "otlp.nr-data.net:4317"
+    # For US accounts -> https://otlp.nr-data.net
+    # For EU accounts -> https://otlp.eu01.nr-data.net
+    endpoint: "https://otlp.nr-data.net"
     # Teams to segragete the telemetry data received by all of the collectors.
     teams:
       # OPS team which is responsible for the cluster and common apps
@@ -110,14 +110,7 @@ deployment:
     # Image pull policy
     pullPolicy: IfNotPresent
     # Image tag
-    tag: "0.86.0"
-
-  # Number of replicas
-  replicas:
-    # Receiver collectors
-    receiver: 1
-    # Sampler collectors
-    sampler: 1
+    tag: ""
 
   # Service account
   serviceAccount:
@@ -126,6 +119,9 @@ deployment:
 
   # Security context for container priviliges
   securityContext: {}
+
+  # Annotations for collector pods
+  annotations: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
@@ -163,17 +159,116 @@ deployment:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi
 
+  # Number of replicas
+  replicas:
+    # Receiver collectors
+    receiver: 1
+    # Sampler collectors
+    sampler: 1
+
+  # Autoscaling configuration. Update according to your own use case.
+  autoscaler:
+    # Receiver collectors
+    receiver:
+      # Flag whether HPA should be enabled
+      enabled: true
+      # Number of minimum available replicas
+      minReplicas: 1
+      # Number of maximum available replicas
+      maxReplicas: 4
+      # Target CPU utilization to keep amongst the replicas
+      targetCPUUtilization: 70
+      # Target MEM utilization to keep amongst the replicas
+      targetMemoryUtilization: 70
+    # Sampler collectors
+    sampler:
+      # Flag whether HPA should be enabled
+      enabled: true
+      # Number of minimum available replicas
+      minReplicas: 1
+      # Number of maximum available replicas
+      maxReplicas: 4
+      # Target CPU utilization to keep amongst the replicas
+      targetCPUUtilization: 70
+      # Target MEM utilization to keep amongst the replicas
+      targetMemoryUtilization: 70
+
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Receiver collectors
+    receiver:
+      # Collector scraping its own metrics
+      self:
+        # Scrape interval
+        scrapeInterval: 60s
+        # Keeps only the most important metrics and drops the rest of the scraped metrics
+        importantMetrics: []
+          # - otelcol_exporter_queue_size
+          # - otelcol_exporter_queue_capacity
+          # - otelcol_processor_dropped_metric_points
+          # - otelcol_processor_dropped_spans
+          # - otelcol_processor_dropped_log_records
+          # - otelcol_exporter_enqueue_failed_metric_points
+          # - otelcol_exporter_enqueue_failed_spans
+          # - otelcol_exporter_enqueue_failed_log_records
+          # - otelcol_receiver_refused_metric_points
+          # - otelcol_receiver_refused_spans
+          # - otelcol_receiver_refused_log_records
+          # - otelcol_exporter_refused_metric_points
+          # - otelcol_exporter_refused_spans
+          # - otelcol_exporter_refused_log_records
+
+    # Sampler collectors
+    sampler:
+      # Collector scraping its own metrics
+      self:
+        # Scrape interval
+        scrapeInterval: 60s
+        # Keeps only the most important metrics and drops the rest of the scraped metrics
+        importantMetrics: []
+          # - otelcol_exporter_queue_size
+          # - otelcol_exporter_queue_capacity
+          # - otelcol_processor_dropped_metric_points
+          # - otelcol_processor_dropped_spans
+          # - otelcol_processor_dropped_log_records
+          # - otelcol_exporter_enqueue_failed_metric_points
+          # - otelcol_exporter_enqueue_failed_spans
+          # - otelcol_exporter_enqueue_failed_log_records
+          # - otelcol_receiver_refused_metric_points
+          # - otelcol_receiver_refused_spans
+          # - otelcol_receiver_refused_log_records
+          # - otelcol_exporter_refused_metric_points
+          # - otelcol_exporter_refused_spans
+          # - otelcol_exporter_refused_log_records
+
+  # Specific collector processor configuration
+  processors:
+    # Receiver collector
+    receiver:
+      # K8s attributes processor labels & annotations config
+      k8sattributes:
+        # Labels
+        labels: []
+        # Annotations
+        annotations: []
+
+  # Specific collector extension configuration
+  extensions:
+    # Memory ballast
+    memory_ballast:
+      # Receiver collectors
+      receiver:
+        # Size in percentage
+        size_in_percentage: 20
+      # Sampler collectors
+      sampler:
+        # Size in percentage
+        size_in_percentage: 20
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -184,9 +279,9 @@ deployment:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -208,7 +303,7 @@ deployment:
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -216,7 +311,7 @@ deployment:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -225,7 +320,7 @@ deployment:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -243,7 +338,7 @@ daemonset:
     # Image pull policy
     pullPolicy: IfNotPresent
     # Image tag
-    tag: "0.86.0"
+    tag: ""
 
   # Service account
   serviceAccount:
@@ -252,6 +347,9 @@ daemonset:
 
   # Security context for container priviliges
   securityContext: {}
+
+  # Annotations for collector pods
+  annotations: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
@@ -289,17 +387,113 @@ daemonset:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - otelcol_exporter_queue_size
+        # - otelcol_exporter_queue_capacity
+        # - otelcol_processor_dropped_metric_points
+        # - otelcol_processor_dropped_spans
+        # - otelcol_processor_dropped_log_records
+        # - otelcol_exporter_enqueue_failed_metric_points
+        # - otelcol_exporter_enqueue_failed_spans
+        # - otelcol_exporter_enqueue_failed_log_records
+        # - otelcol_receiver_refused_metric_points
+        # - otelcol_receiver_refused_spans
+        # - otelcol_receiver_refused_log_records
+        # - otelcol_exporter_refused_metric_points
+        # - otelcol_exporter_refused_spans
+        # - otelcol_exporter_refused_log_records
+
+  # Specific collector processor configuration
+  processors:
+    # K8s attributes processor labels & annotations config
+    k8sattributes:
+      # Labels
+      labels: []
+      # Annotations
+      annotations: []
+
+  # Specific collector extension configuration
+  extensions:
+    # Memory ballast
+    memory_ballast:
+      # Size in percentage
+      size_in_percentage: 20
+
+  # Log tailing & parsing rules
+  filelog:
+    start_at: end
+    include:
+    - /var/log/pods/*/*/*.log
+    include_file_name: false
+    include_file_path: true
+    operators:
+    - id: get-format
+      routes:
+      - expr: body matches "^\\{"
+        output: parser-docker
+      - expr: body matches "^[^ Z]+ "
+        output: parser-crio
+      - expr: body matches "^[^ Z]+Z"
+        output: parser-containerd
+      type: router
+    - id: parser-crio
+      output: extract_metadata_from_filepath
+      regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+      timestamp:
+        layout: "2006-01-02T15:04:05.000000000-07:00"
+        layout_type: gotime
+        parse_from: attributes.time
+      type: regex_parser
+    - id: parser-containerd
+      output: extract_metadata_from_filepath
+      regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+      timestamp:
+        layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+        parse_from: attributes.time
+      type: regex_parser
+    - id: parser-docker
+      output: extract_metadata_from_filepath
+      timestamp:
+        layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+        parse_from: attributes.time
+      type: json_parser
+    - id: extract_metadata_from_filepath
+      parse_from: attributes["log.file.path"]
+      regex: ^.*\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-f0-9\-]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
+      type: regex_parser
+    - from: attributes.stream
+      to: attributes["log.iostream"]
+      type: move
+    - from: attributes.container_name
+      to: resource["k8s.container.name"]
+      type: move
+    - from: attributes.namespace
+      to: resource["k8s.namespace.name"]
+      type: move
+    - from: attributes.pod_name
+      to: resource["k8s.pod.name"]
+      type: move
+    - from: attributes.restart_count
+      to: resource["k8s.container.restart_count"]
+      type: move
+    - from: attributes.uid
+      to: resource["k8s.pod.uid"]
+      type: move
+    - from: attributes.log
+      to: body
+      type: move
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -310,9 +504,9 @@ daemonset:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -334,7 +528,7 @@ daemonset:
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -342,7 +536,7 @@ daemonset:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -351,7 +545,7 @@ daemonset:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -369,10 +563,7 @@ statefulset:
     # Image pull policy
     pullPolicy: IfNotPresent
     # Image tag
-    tag: "0.86.0"
-
-  # Number of replicas
-  replicas: 2
+    tag: ""
 
   # Service account
   serviceAccount:
@@ -381,6 +572,9 @@ statefulset:
 
   # Security context for container priviliges
   securityContext: {}
+
+  # Annotations for collector pods
+  annotations: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
@@ -476,17 +670,108 @@ statefulset:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi
 
+  # Number of replicas
+  replicas: 2
+
+  # Autoscaling configuration. Update according to your own use case.
+  autoscaler:
+    # Flag whether HPA should be enabled
+    enabled: true
+    # Number of minimum available replicas
+    minReplicas: 1
+    # Number of maximum available replicas
+    maxReplicas: 4
+    # Target CPU utilization to keep amongst the replicas
+    targetCPUUtilization: 70
+    # Target MEM utilization to keep amongst the replicas
+    targetMemoryUtilization: 70
+
+  # Target allocator
+  targetAllocator:
+    # Strategy to filter the discovered targets before distributing them across collectors.
+    # Options:
+    # - relabel-config (default)
+    filterStrategy: relabel-config
+    # Strategy to distribute targets across collectors.
+    # Options:
+    # - consistent-hashing (default)
+    # - least-weighted
+    allocationStrategy: consistent-hashing
+
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - otelcol_exporter_queue_size
+        # - otelcol_exporter_queue_capacity
+        # - otelcol_processor_dropped_metric_points
+        # - otelcol_processor_dropped_spans
+        # - otelcol_processor_dropped_log_records
+        # - otelcol_exporter_enqueue_failed_metric_points
+        # - otelcol_exporter_enqueue_failed_spans
+        # - otelcol_exporter_enqueue_failed_log_records
+        # - otelcol_receiver_refused_metric_points
+        # - otelcol_receiver_refused_spans
+        # - otelcol_receiver_refused_log_records
+        # - otelcol_exporter_refused_metric_points
+        # - otelcol_exporter_refused_spans
+        # - otelcol_exporter_refused_log_records
+
+    # Kube API server specific configuration
+    kubeApiServer:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - apiserver_request_duration_seconds_.*
+        # - apiserver_request_total
+        # - workqueue_adds_total
+        # - workqueue_depth
+        # - apiserver_current_inflight_requests
+        # - apiserver_dropped_requests_total
+
+    # Nodes specific configuration
+    nodes:
+      # Scrape interval
+      scrapeInterval: 60s
+
+    # cAdvisor specific configuration
+    cAdvisor:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - container_cpu_usage_seconds_total
+        # - container_memory_usage_bytes
+        # - container_memory_working_set_bytes
+        # - container_memory_rss
+        # - container_memory_swap
+        # - container_fs_reads_total
+        # - container_fs_writes_total
+        # - container_network_receive_bytes_total
+        # - container_network_transmit_bytes_total
+
+    # Core DNS specific configuration
+    coreDns:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - coredns_dns_request_duration_seconds
+        # - coredns_dns_requests_total
+        # - coredns_dns_responses_total
+        # - coredns_panics_total
+        # - coredns_cache_hits_total
+
     # Node exporter specific configuration
     nodeExporter:
       # - If you don't have any node-exporter, you can let this chart deploy it as a dependency by setting
@@ -496,6 +781,18 @@ statefulset:
       #   will not deploy any node-exporter.
       enabled: true
       serviceNameRef: null
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - node_cpu_seconds_total
+        # - node_memory_MemTotal_bytes
+        # - node_memory_MemFree_bytes
+        # - node_memory_Cached_bytes
+        # - node_memory_Buffers_bytes
+        # - node_filesystem_avail_bytes
+        # - node_filesystem_size_bytes
+
     # Kube state metrics specific configuration
     kubeStateMetrics:
       # - If you don't have any kube-state-metrics, you can let this chart deploy it as a dependency by setting
@@ -505,6 +802,122 @@ statefulset:
       #   will not deploy any kube-state-metrics.
       enabled: true
       serviceNameRef: null
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - kube_pod_info
+        # - kube_pod_status_phase
+        # - kube_pod_container_status_waiting
+        # - kube_pod_status_scheduled_time
+        # - kube_daemonset_created
+        # - kube_daemonset_status_number_available
+        # - kube_deployment_status_replicas_unavailable
+        # - kube_deployment_status_condition
+        # - kube_replicaset_status_ready_replicas
+        # - kube_replicaset_status_replicas
+        # - kube_statefulset_replicas
+        # - kube_statefulset_status_replicas
+        # - kube_pod_start_time
+        # - kube_pod_status_reason
+        # - kube_pod_container_resource_limits
+        # - kube_pod_status_scheduled
+        # - kube_pod_container_resource_requests
+        # - kube_pod_status_container_ready_time
+        # - kube_pod_container_status_terminated
+        # - kube_pod_container_status_ready
+        # - kube_statefulset_status_replicas_updated
+        # - kube_statefulset_status_replicas_ready
+        # - kube_daemonset_status_desired_number_scheduled
+        # - kube_deployment_status_replicas_ready
+        # - kube_pod_container_state_started
+        # - kube_statefulset_created
+        # - kube_daemonset_status_updated_number_scheduled
+        # - kube_statefulset_status_replicas_current
+        # - kube_daemonset_status_number_ready
+        # - kube_pod_container_status_running
+        # - kube_pod_created
+        # - kube_pod_container_status_restarts_total
+        # - kube_daemonset_status_number_unavailable
+
+    # Kubernetes service endpoint specific configuration
+    serviceEndpoints:
+      # Flag whether scrape job should be created
+      scrape: true
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - metric1
+        # - metric2
+        # - metric3
+
+    # Target allocator specific configuration
+    targetAllocator:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - opentelemetry_allocator_collectors_allocatable
+        # - opentelemetry_allocator_targets
+        # - opentelemetry_allocator_targets_per_collector
+        # - opentelemetry_allocator_targets_remaining
+
+    # Config for defining extra custom scrape jobs
+    extraScrapeJobs:
+      # Kubernetes pod specific scrape job
+      - job_name: 'kubernetes-pods'
+        scrape_interval: 60s
+        honor_labels: true
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+            action: drop
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $$1:$$2
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: node
+
+  # Specific collector processor configuration
+  processors:
+    # K8s attributes processor labels & annotations config
+    k8sattributes:
+      # Labels
+      labels: []
+      # Annotations
+      annotations: []
+
+  # Specific collector extension configuration
+  extensions:
+    # Memory ballast
+    memory_ballast:
+      # Size in percentage
+      size_in_percentage: 20
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -515,9 +928,9 @@ statefulset:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -539,7 +952,7 @@ statefulset:
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -547,7 +960,7 @@ statefulset:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -556,7 +969,7 @@ statefulset:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -574,7 +987,7 @@ singleton:
     # Image pull policy
     pullPolicy: IfNotPresent
     # Image tag
-    tag: "0.86.0"
+    tag: ""
 
   # Service account
   serviceAccount:
@@ -583,6 +996,9 @@ singleton:
 
   # Security context for container priviliges
   securityContext: {}
+
+  # Annotations for collector pods
+  annotations: {}
 
   clusterRole:
     # Annotations to add to the clusterRole
@@ -667,17 +1083,40 @@ singleton:
   resources:
     requests:
       cpu: 32m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 256m
       memory: 512Mi
 
   # Specific Prometheus configuration
   prometheus:
-    # Low data mode decreases the scrape frequency of the endpoints
-    lowDataMode: false
-    # Keeps only the most important metrics and drops the rest of the scraped metrics
-    importantMetricsOnly: false
+    # Collector scraping its own metrics
+    self:
+      # Scrape interval
+      scrapeInterval: 60s
+      # Keeps only the most important metrics and drops the rest of the scraped metrics
+      importantMetrics: []
+        # - otelcol_exporter_queue_size
+        # - otelcol_exporter_queue_capacity
+        # - otelcol_processor_dropped_metric_points
+        # - otelcol_processor_dropped_spans
+        # - otelcol_processor_dropped_log_records
+        # - otelcol_exporter_enqueue_failed_metric_points
+        # - otelcol_exporter_enqueue_failed_spans
+        # - otelcol_exporter_enqueue_failed_log_records
+        # - otelcol_receiver_refused_metric_points
+        # - otelcol_receiver_refused_spans
+        # - otelcol_receiver_refused_log_records
+        # - otelcol_exporter_refused_metric_points
+        # - otelcol_exporter_refused_spans
+        # - otelcol_exporter_refused_log_records
+
+  # Specific collector extension configuration
+  extensions:
+    # Memory ballast
+    memory_ballast:
+      # Size in percentage
+      size_in_percentage: 20
 
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
@@ -688,9 +1127,9 @@ singleton:
       # running on it.
       opsteam:
         # OTLP endpoint
-        # For US accounts -> otlp.nr-data.net:4317
-        # For EU accounts -> otlp.eu01.nr-data.net:4317
-        endpoint: "otlp.nr-data.net:4317"
+        # For US accounts -> https://otlp.nr-data.net
+        # For EU accounts -> https://otlp.eu01.nr-data.net
+        endpoint: "https://otlp.nr-data.net"
         # New Relic ingest license key
         # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
         licenseKey:
@@ -706,13 +1145,16 @@ singleton:
         # -> If nothing is defined, all telemetry data will be sent
         namespaces: []
 
+      ###################################################################
+      ### Multi-account export does not work for events at the moment ###
+      ###################################################################
       # # If you want to send the namespaced telemetry data from the
       # # cluster to the accounts of the individual dev teams
       # # comment in below.
       # # Dev team 1 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam1:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -720,7 +1162,7 @@ singleton:
       # # Dev team 2 which is responsible for its own apps running
       # # in a specific namespace.
       # devteam2:
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:
@@ -729,7 +1171,7 @@ singleton:
       # # in a specific namespace but not on this cluster.
       # devteam3:
       #   ignore: true
-      #   endpoint: "otlp.nr-data.net:4317"
+      #   endpoint: "https://otlp.nr-data.net"
       #   licenseKey:
       #     value: ""
       #   namespaces:

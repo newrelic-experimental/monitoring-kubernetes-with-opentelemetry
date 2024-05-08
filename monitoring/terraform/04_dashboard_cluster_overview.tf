@@ -217,6 +217,24 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         EOF
       }
     }
+
+    # Node events
+    widget_log_table {
+      title  = "Node events"
+      row    = 15
+      column = 1
+      height = 5
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'Node' AND k8s.object.name IN ({{nodes}})
+        EOF
+      }
+    }
   }
 
   ##########################
@@ -459,7 +477,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = <<EOF
         FROM (
-          FROM Metric SELECT average(container_memory_usage_bytes) AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+          FROM Metric SELECT average(container_memory_working_set_bytes) AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
             AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND k8s.node.name IN ({{nodes}}) AND namespace IN ({{namespaces}})
             FACET namespace, pod, container TIMESERIES AUTO LIMIT MAX
           ) SELECT sum(`usage`) FACET namespace TIMESERIES AUTO
@@ -481,7 +499,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         FROM (
           FROM Metric SELECT
             filter(
-              average(container_memory_usage_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
+              average(container_memory_working_set_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
             ) AS `usage`,
             filter(
               max(kube_pod_container_resource_limits), WHERE service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory'
@@ -492,6 +510,78 @@ resource "newrelic_one_dashboard" "cluster_overview" {
                     AND resource = 'memory' AND node IN ({{nodes}}) AND namespace IN ({{namespaces}}) LIMIT MAX
                 ) FACET namespace, pod, container TIMESERIES AUTO LIMIT MAX
           ) SELECT sum(`usage`)/sum(`limit`)*100 FACET namespace TIMESERIES AUTO
+        EOF
+      }
+    }
+
+    # Replicaset events
+    widget_log_table {
+      title  = "Replicaset events"
+      row    = 11
+      column = 1
+      height = 4
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'ReplicaSet' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(replicaset)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND replicaset IS NOT NULL AND metricName = 'kube_replicaset_status_replicas' AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
+        EOF
+      }
+    }
+
+    # Daemonset events
+    widget_log_table {
+      title  = "Daemonset events"
+      row    = 15
+      column = 1
+      height = 4
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'DaemonSet' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(daemonset)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND daemonset IS NOT NULL AND metricName = 'kube_daemonset_status_number_available' AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
+        EOF
+      }
+    }
+
+    # Statefulset events
+    widget_log_table {
+      title  = "Statefulset events"
+      row    = 19
+      column = 1
+      height = 4
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'StatefulSet' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(statefulset)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND statefulset IS NOT NULL AND metricName = 'kube_statefulset_status_replicas' AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
         EOF
       }
     }
@@ -728,7 +818,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = <<EOF
-        FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+        FROM Metric SELECT average(container_memory_working_set_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
           AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IS NOT NULL AND k8s.node.name IN ({{nodes}})
           AND namespace IN ({{namespaces}}) FACET pod, container TIMESERIES AUTO
         EOF
@@ -748,7 +838,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         query      = <<EOF
         FROM Metric SELECT
           filter(
-            average(container_memory_usage_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor'
+            average(container_memory_working_set_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor'
               AND container IN (
                 FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
                   AND kube_pod_container_resource_limits IS NOT NULL AND service.name = 'kubernetes-kube-state-metrics' AND resource = 'memory' LIMIT MAX
@@ -831,6 +921,54 @@ resource "newrelic_one_dashboard" "cluster_overview" {
         FROM Metric SELECT rate(average(container_network_transmit_bytes_total)/1024/1024, 1 SECOND) AS `rate` WHERE instrumentation.provider = 'opentelemetry'
           AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND pod IS NOT NULL AND k8s.node.name IN ({{nodes}})
           AND namespace IN ({{namespaces}}) FACET pod TIMESERIES AUTO
+        EOF
+      }
+    }
+
+    # Pod events
+    widget_log_table {
+      title  = "Pod events"
+      row    = 17
+      column = 1
+      height = 5
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.object.kind = 'Pod' AND k8s.object.name IN
+            (
+              FROM Metric SELECT uniques(pod)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND pod IS NOT NULL AND metricName = 'kube_pod_info' AND node IN ({{nodes}}) AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
+        EOF
+      }
+    }
+
+    # Pod logs
+    widget_log_table {
+      title  = "Pod logs"
+      row    = 22
+      column = 1
+      height = 5
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.node.name IN ({{nodes}})
+            AND k8s.pod.name IN (
+              FROM Metric SELECT uniques(pod)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-kube-state-metrics'
+                  AND pod IS NOT NULL AND metricName = 'kube_pod_info' AND node IN ({{nodes}}) AND namespace IN ({{namespaces}})
+                LIMIT MAX
+            )
         EOF
       }
     }

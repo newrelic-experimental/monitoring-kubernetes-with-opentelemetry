@@ -208,7 +208,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
         query      = <<EOF
-        FROM Metric SELECT average(container_memory_usage_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+        FROM Metric SELECT average(container_memory_working_set_bytes) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
           AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL
           AND pod IN (
             FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
@@ -231,7 +231,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
         query      = <<EOF
         FROM Metric SELECT
           filter(
-            average(container_memory_usage_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
+            average(container_memory_working_set_bytes), WHERE service.name = 'kubernetes-nodes-cadvisor'
           )
           /
           filter(
@@ -498,6 +498,58 @@ resource "newrelic_one_dashboard" "otel_collector" {
         FROM Metric SELECT average(otelcol_exporter_refused_log_records)
           WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector'
             AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}}) FACET k8s.pod.name TIMESERIES
+        EOF
+      }
+    }
+
+    # Collector events
+    widget_log_table {
+      title  = "Collector events"
+      row    = 28
+      column = 1
+      height = 5
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND (
+              k8s.object.name LIKE '%dep-rec-collector%'
+                OR
+              k8s.object.name LIKE '%dep-smp-collector%'
+                OR
+              k8s.object.name LIKE '%ds-collector%'
+                OR
+              k8s.object.name LIKE '%sts-collector%'
+                OR
+              k8s.object.name LIKE '%sng-collector%'
+            )
+        EOF
+      }
+    }
+
+    # Collector logs
+    widget_log_table {
+      title  = "Collector logs"
+      row    = 33
+      column = 1
+      height = 5
+      width  = 12
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = <<EOF
+        FROM Log SELECT *
+          WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+            AND k8s.node.name IN ({{nodes}}) AND k8s.container.name = 'otc-container'
+            AND k8s.pod.name IN (
+              FROM Metric SELECT uniques(k8s.pod.name)
+                WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}'
+                  AND k8s.node.name IN ({{nodes}}) AND otelcollector.type IN ({{collectortypes}})
+                LIMIT MAX
+            )
         EOF
       }
     }

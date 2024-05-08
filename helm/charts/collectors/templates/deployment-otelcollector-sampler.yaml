@@ -9,15 +9,19 @@ spec:
   # Mode
   mode: "deployment"
 
-  # Replicas
-  replicas: {{ .Values.deployment.replicas.sampler }}
-
   # Service Account
   serviceAccount: {{ include "nrotel.deploymentName" . }}
 
   # Security context for container priviliges
   {{- with .Values.deployment.securityContext }}
   securityContext: {{ toYaml . | nindent 4 }}
+  {{- end }}
+
+  # Annotations for the pods
+  podAnnotations:
+    prometheus.io/scrape: "false" # This should be false by default. Otherwise 'otelcollector' self scraper job AND 'kubernetes-pods' scrape job will both scrape
+  {{- range $key, $val := .Values.deployment.annotations }}
+    {{ $key }}: {{ $val }}
   {{- end }}
 
   # Ports to expose per service
@@ -28,7 +32,7 @@ spec:
       targetPort: {{ .Values.deployment.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+  image: "{{ .Values.deployment.image.repository }}:{{ include "nrotel.deploymentImageTag" . }}"
   imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
 
   # Resources
@@ -39,6 +43,18 @@ spec:
     limits:
       cpu: {{ .Values.deployment.resources.limits.cpu }}
       memory: {{ .Values.deployment.resources.limits.memory }}
+
+  # Replicas
+  replicas: {{ .Values.deployment.replicas.sampler }}
+
+  # Autoscaling configuration
+  {{- if eq .Values.deployment.autoscaler.sampler.enabled true }}
+  autoscaler:
+    minReplicas: {{ .Values.deployment.autoscaler.sampler.minReplicas }}
+    maxReplicas: {{ .Values.deployment.autoscaler.sampler.maxReplicas }}
+    targetCPUUtilization: {{ .Values.deployment.autoscaler.sampler.targetCPUUtilization }}
+    targetMemoryUtilization: {{ .Values.deployment.autoscaler.sampler.targetMemoryUtilization }}
+  {{- end }}
 
   # Environment variables
   env:
@@ -103,29 +119,32 @@ spec:
         config:
           scrape_configs:
             - job_name: 'otelcollector'
-            {{- if .Values.deployment.prometheus.lowDataMode }}
-              scrape_interval: 60s
-            {{- else }}
-              scrape_interval: 10s
-            {{- end }}
+              scrape_interval: {{ .Values.deployment.prometheus.sampler.self.scrapeInterval }}
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.deployment.ports.prometheus.port }}
-            {{- if .Values.deployment.prometheus.importantMetricsOnly }}
+                - 127.0.0.1:{{ .Values.deployment.ports.prometheus.port }}
+              {{- if ne (len .Values.deployment.prometheus.sampler.self.importantMetrics) 0 }}
+                {{ $metrics := "" -}}
+                {{- range $index, $metric := .Values.deployment.prometheus.sampler.self.importantMetrics -}}
+                  {{- if eq $index 0 -}}
+                    {{- $metrics = printf "%s" $metric -}}
+                  {{ else }}
+                    {{- $metrics = printf "%s|%s" $metrics $metric -}}
+                  {{- end -}}
+                {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   separator: ;
-                  regex: otelcol_exporter_queue_size|otelcol_exporter_queue_capacity|otelcol_processor_dropped_metric_points|otelcol_processor_dropped_spans|otelcol_processor_dropped_log_records|otelcol_exporter_enqueue_failed_metric_points|otelcol_exporter_enqueue_failed_spans|otelcol_exporter_enqueue_failed_log_records|otelcol_receiver_refused_metric_points|otelcol_receiver_refused_spans|otelcol_receiver_refused_log_records|otelcol_exporter_refused_metric_points|otelcol_exporter_refused_spans|otelcol_exporter_refused_log_records
+                  regex: {{ $metrics }}
                   replacement: $1
                   action: keep
-            {{- end }}
+              {{- end }}
       otlp:
         protocols:
           grpc:
           http:
 
     processors:
-      cumulativetodelta:
       attributes:
         actions:
           - key: k8s.cluster.name
@@ -195,7 +214,7 @@ spec:
     {{- if .Values.global.newrelic.enabled }}
       {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -206,7 +225,7 @@ spec:
     {{- else }}
       {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -220,7 +239,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 20
+        size_in_percentage: {{ .Values.deployment.extensions.memory_ballast.sampler.size_in_percentage }}
 
     service:
       extensions:
@@ -230,13 +249,12 @@ spec:
           receivers:
             - prometheus/self
           processors:
-            - cumulativetodelta
+            - memory_limiter
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
-            - otlp/opsteam
+            - otlphttp/opsteam
             # - logging
       {{- if .Values.global.newrelic.enabled }}
         {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
@@ -245,14 +263,14 @@ spec:
           receivers:
             - otlp
           processors:
-            - attributes
             - memory_limiter
+            - attributes
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
@@ -263,14 +281,14 @@ spec:
           receivers:
             - otlp
           processors:
-            - attributes
             - memory_limiter
+            - attributes
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
@@ -279,5 +297,5 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.deployment.ports.prometheus.targetPort }}
+          address: 127.0.0.1:{{ .Values.deployment.ports.prometheus.targetPort }}
 {{- end -}}

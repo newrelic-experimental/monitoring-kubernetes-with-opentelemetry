@@ -102,7 +102,7 @@ helm template nrotelk8s \
   --namespace "monitoring" \
   --set clusterName="cluster1" \
   --set global.newrelic.enabled=true \
-  --set global.newrelic.endpoint="otlp.nr-data.net:4317" \
+  --set global.newrelic.endpoint="https://otlp.nr-data.net" \
   --set global.newrelic.teams.opsteam.licenseKey.value="value_ops" \
   --set global.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
   --set global.newrelic.teams.devteam1.namespaces[0]="devteam1" \
@@ -121,7 +121,7 @@ helm template nrotelk8s \
   --namespace "monitoring" \
   --set clusterName="cluster1" \
   --set global.newrelic.enabled=true \
-  --set global.newrelic.endpoint="otlp.nr-data.net:4317" \
+  --set global.newrelic.endpoint="https://otlp.nr-data.net" \
   --set global.newrelic.teams.opsteam.licenseKey.value="value_ops" \
   --set global.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
   --set global.newrelic.teams.devteam1.namespaces[0]="devteam1" \
@@ -141,7 +141,7 @@ helm template nrotelk8s \
   --namespace "monitoring" \
   --set clusterName="cluster1" \
   --set global.newrelic.enabled=true \
-  --set global.newrelic.endpoint="otlp.nr-data.net:4317" \
+  --set global.newrelic.endpoint="https://otlp.nr-data.net" \
   --set global.newrelic.teams.opsteam.licenseKey.value="value_ops" \
   --set global.newrelic.teams.devteam1.licenseKey.value="value_dev1" \
   --set global.newrelic.teams.devteam1.namespaces[0]="devteam1" \

@@ -44,10 +44,12 @@ helm upgrade nrotelk8s \
 
 If the New Relic account where you want to send the data to is
 
-- in US, use `otlp.nr-data.net:4317`
-- in EU, use `otlp.eu01.nr-data.net:4317`
+- in US, use `https://otlp.nr-data.net`
+- in EU, use `https://otlp.eu01.nr-data.net`
 
 There 2 ways: global & individual.
+
+**REMARK:** The solution requires one main New Relic account which represents the infrastructure team who should be aware of every fundamental thing going on in the cluster. This is named as the `opsteam` and this is a mandatory field under each `teams` section!
 
 #### Global
 

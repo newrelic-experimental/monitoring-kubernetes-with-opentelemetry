@@ -37,5 +37,5 @@ helm upgrade ${oteloperator[name]} \
   --debug \
   --create-namespace \
   --namespace ${oteloperator[namespace]} \
-  --version "0.40.0" \
+  --version "0.49.0" \
   "open-telemetry/opentelemetry-operator"

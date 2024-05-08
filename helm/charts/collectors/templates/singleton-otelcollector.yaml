@@ -20,6 +20,13 @@ spec:
   securityContext: {{ toYaml . | nindent 4 }}
   {{- end }}
 
+  # Annotations for the pods
+  podAnnotations:
+    prometheus.io/scrape: "false" # This should be false by default. Otherwise 'otelcollector' self scraper job AND 'kubernetes-pods' scrape job will both scrape
+  {{- range $key, $val := .Values.singleton.annotations }}
+    {{ $key }}: {{ $val }}
+  {{- end }}
+
   # Ports to expose per service
   ports:
     - name: prometheus
@@ -28,7 +35,7 @@ spec:
       targetPort: {{ .Values.singleton.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.singleton.image.repository }}:{{ .Values.singleton.image.tag }}"
+  image: "{{ .Values.singleton.image.repository }}:{{ include "nrotel.singletonImageTag" . }}"
   imagePullPolicy: {{ .Values.singleton.image.pullPolicy }}
 
   # Resources
@@ -103,32 +110,42 @@ spec:
         config:
           scrape_configs:
             - job_name: 'otelcollector'
-            {{- if .Values.singleton.prometheus.lowDataMode }}
-              scrape_interval: 60s
-            {{- else }}
-              scrape_interval: 10s
-            {{- end }}
+              scrape_interval: {{ .Values.singleton.prometheus.self.scrapeInterval }}
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.singleton.ports.prometheus.port }}
-            {{- if .Values.deployment.prometheus.importantMetricsOnly }}
+                - 127.0.0.1:{{ .Values.singleton.ports.prometheus.port }}
+              {{- if ne (len .Values.singleton.prometheus.self.importantMetrics) 0 }}
+                {{ $metrics := "" -}}
+                {{- range $index, $metric := .Values.singleton.prometheus.self.importantMetrics -}}
+                  {{- if eq $index 0 -}}
+                    {{- $metrics = printf "%s" $metric -}}
+                  {{ else }}
+                    {{- $metrics = printf "%s|%s" $metrics $metric -}}
+                  {{- end -}}
+                {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   separator: ;
-                  regex: otelcol_exporter_queue_size|otelcol_exporter_queue_capacity|otelcol_processor_dropped_metric_points|otelcol_processor_dropped_spans|otelcol_processor_dropped_log_records|otelcol_exporter_enqueue_failed_metric_points|otelcol_exporter_enqueue_failed_spans|otelcol_exporter_enqueue_failed_log_records|otelcol_receiver_refused_metric_points|otelcol_receiver_refused_spans|otelcol_receiver_refused_log_records|otelcol_exporter_refused_metric_points|otelcol_exporter_refused_spans|otelcol_exporter_refused_log_records
+                  regex: {{ $metrics }}
                   replacement: $1
                   action: keep
-            {{- end }}
+              {{- end }}
       k8s_events:
 
     processors:
-      cumulativetodelta:
       k8sattributes:
         extract:
           metadata:
-          - k8s.node.name
           - k8s.namespace.name
+          - k8s.deployment.name
+          - k8s.statefulset.name
+          - k8s.daemonset.name
+          - k8s.cronjob.name
+          - k8s.job.name
+          - k8s.node.name
           - k8s.pod.name
+          - k8s.pod.uid
+          - k8s.pod.start_time
         passthrough: false
         pod_association:
         - sources:
@@ -139,11 +156,13 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
+
       attributes:
         actions:
           - key: k8s.cluster.name
             value: {{ .Values.clusterName }}
             action: upsert
+
       attributes/self:
         actions:
           - key: otelcollector.type
@@ -163,8 +182,8 @@ spec:
           {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
       filter/{{ $teamName }}:
         error_mode: ignore
-        logs:
-          log_record:
+        metrics:
+          datapoint:
           {{ $conditionForK8sNamespaceName := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
@@ -177,12 +196,12 @@ spec:
           {{- end }}
         {{- end }}
       {{- else }}
-        {{- range $teamName, $teamInfo := .Values.singleton.newrelic.teams }}
+        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
           {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
       filter/{{ $teamName }}:
         error_mode: ignore
-        logs:
-          log_record:
+        metrics:
+          datapoint:
           {{ $conditionForK8sNamespaceName := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
@@ -208,7 +227,7 @@ spec:
     {{- if .Values.global.newrelic.enabled }}
       {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -219,7 +238,7 @@ spec:
     {{- else }}
       {{- range $teamName, $teamInfo := .Values.singleton.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -233,7 +252,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 20
+        size_in_percentage: {{ .Values.singleton.extensions.memory_ballast.size_in_percentage }}
 
     service:
       extensions:
@@ -243,14 +262,13 @@ spec:
           receivers:
             - prometheus/self
           processors:
-            - cumulativetodelta
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
-            - otlp/opsteam
+            - otlphttp/opsteam
             # - logging
       {{- if .Values.global.newrelic.enabled }}
         {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
@@ -259,16 +277,14 @@ spec:
           receivers:
             - k8s_events
           processors:
-            - k8sattributes
-            - attributes
-            - attributes/self
             - memory_limiter
+            - attributes
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
@@ -279,16 +295,14 @@ spec:
           receivers:
             - k8s_events
           processors:
-            - k8sattributes
-            - attributes
-            - attributes/self
             - memory_limiter
+            - attributes
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
@@ -297,5 +311,5 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.singleton.ports.prometheus.targetPort }}
+          address: 127.0.0.1:{{ .Values.singleton.ports.prometheus.targetPort }}
 {{- end -}}

@@ -17,6 +17,13 @@ spec:
   securityContext: {{ toYaml . | nindent 4 }}
   {{- end }}
 
+  # Annotations for the pods
+  podAnnotations:
+    prometheus.io/scrape: "false" # This should be false by default. Otherwise 'otelcollector' self scraper job AND 'kubernetes-pods' scrape job will both scrape
+  {{- range $key, $val := .Values.daemonset.annotations }}
+    {{ $key }}: {{ $val }}
+  {{- end }}
+
   # Ports to expose per service
   ports:
     - name: prometheus
@@ -25,7 +32,7 @@ spec:
       targetPort: {{ .Values.daemonset.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.daemonset.image.repository }}:{{ .Values.daemonset.image.tag }}"
+  image: "{{ .Values.daemonset.image.repository }}:{{ include "nrotel.daemonsetImageTag" . }}"
   imagePullPolicy: {{ .Values.daemonset.image.pullPolicy }}
 
   # Resources
@@ -118,93 +125,53 @@ spec:
         config:
           scrape_configs:
             - job_name: 'otelcollector'
-            {{- if .Values.daemonset.prometheus.lowDataMode }}
-              scrape_interval: 60s
-            {{- else }}
-              scrape_interval: 10s
-            {{- end }}
+              scrape_interval: {{ .Values.daemonset.prometheus.self.scrapeInterval }}
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.daemonset.ports.prometheus.port }}
-            {{- if .Values.deployment.prometheus.importantMetricsOnly }}
+                - 127.0.0.1:{{ .Values.daemonset.ports.prometheus.port }}
+              {{- if ne (len .Values.daemonset.prometheus.self.importantMetrics) 0 }}
+                {{ $metrics := "" -}}
+                {{- range $index, $metric := .Values.daemonset.prometheus.self.importantMetrics -}}
+                  {{- if eq $index 0 -}}
+                    {{- $metrics = printf "%s" $metric -}}
+                  {{ else }}
+                    {{- $metrics = printf "%s|%s" $metrics $metric -}}
+                  {{- end -}}
+                {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   separator: ;
-                  regex: otelcol_exporter_queue_size|otelcol_exporter_queue_capacity|otelcol_processor_dropped_metric_points|otelcol_processor_dropped_spans|otelcol_processor_dropped_log_records|otelcol_exporter_enqueue_failed_metric_points|otelcol_exporter_enqueue_failed_spans|otelcol_exporter_enqueue_failed_log_records|otelcol_receiver_refused_metric_points|otelcol_receiver_refused_spans|otelcol_receiver_refused_log_records|otelcol_exporter_refused_metric_points|otelcol_exporter_refused_spans|otelcol_exporter_refused_log_records
+                  regex: {{ $metrics }}
                   replacement: $1
                   action: keep
-            {{- end }}
-      filelog:
-        start_at: end
-        include:
-        - /var/log/pods/*/*/*.log
-        include_file_name: false
-        include_file_path: true
-        operators:
-        - id: get-format
-          routes:
-          - expr: body matches "^\\{"
-            output: parser-docker
-          - expr: body matches "^[^ Z]+ "
-            output: parser-crio
-          - expr: body matches "^[^ Z]+Z"
-            output: parser-containerd
-          type: router
-        - id: parser-crio
-          output: extract_metadata_from_filepath
-          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
-          timestamp:
-            layout: "2006-01-02T15:04:05.000000000-07:00"
-            layout_type: gotime
-            parse_from: attributes.time
-          type: regex_parser
-        - id: parser-containerd
-          output: extract_metadata_from_filepath
-          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: attributes.time
-          type: regex_parser
-        - id: parser-docker
-          output: extract_metadata_from_filepath
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: attributes.time
-          type: json_parser
-        - id: extract_metadata_from_filepath
-          parse_from: attributes["log.file.path"]
-          regex: ^.*\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-f0-9\-]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
-          type: regex_parser
-        - from: attributes.stream
-          to: attributes["log.iostream"]
-          type: move
-        - from: attributes.container_name
-          to: resource["k8s.container.name"]
-          type: move
-        - from: attributes.namespace
-          to: resource["k8s.namespace.name"]
-          type: move
-        - from: attributes.pod_name
-          to: resource["k8s.pod.name"]
-          type: move
-        - from: attributes.restart_count
-          to: resource["k8s.container.restart_count"]
-          type: move
-        - from: attributes.uid
-          to: resource["k8s.pod.uid"]
-          type: move
-        - from: attributes.log
-          to: body
-          type: move
+              {{- end }}
+      {{- with .Values.daemonset.filelog }}
+      filelog: {{ toYaml . | nindent 8 }}
+      {{- end }}
 
     processors:
-      cumulativetodelta:
       k8sattributes:
         extract:
           metadata:
-          - k8s.node.name
           - k8s.namespace.name
+          - k8s.deployment.name
+          - k8s.statefulset.name
+          - k8s.daemonset.name
+          - k8s.cronjob.name
+          - k8s.job.name
+          - k8s.node.name
           - k8s.pod.name
+          - k8s.pod.uid
+          - k8s.pod.start_time
+
+          {{- with .Values.daemonset.processors.k8sattributes.labels }}
+          labels: {{ toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.daemonset.processors.k8sattributes.annotations }}
+          annotations: {{ toYaml . | nindent 12 }}
+          {{- end }}
+
         passthrough: false
         pod_association:
         - sources:
@@ -215,11 +182,13 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
+
       attributes:
         actions:
           - key: k8s.cluster.name
             value: {{ .Values.clusterName }}
             action: upsert
+
       attributes/self:
         actions:
           - key: otelcollector.type
@@ -284,7 +253,7 @@ spec:
     {{- if .Values.global.newrelic.enabled }}
       {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -295,7 +264,7 @@ spec:
     {{- else }}
       {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams }}
         {{- if ne $teamInfo.ignore true }}
-      otlp/{{ $teamName }}:
+      otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
@@ -309,7 +278,7 @@ spec:
 
     extensions:
       memory_ballast:
-        size_in_percentage: 20
+        size_in_percentage: {{ .Values.daemonset.extensions.memory_ballast.size_in_percentage }}
 
     service:
       extensions:
@@ -319,14 +288,13 @@ spec:
           receivers:
             - prometheus/self
           processors:
-            - cumulativetodelta
+            - memory_limiter
             - k8sattributes
             - attributes
             - attributes/self
-            - memory_limiter
             - batch
           exporters:
-            - otlp/opsteam
+            - otlphttp/opsteam
             # - logging
       {{- if .Values.global.newrelic.enabled }}
         {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
@@ -335,15 +303,15 @@ spec:
           receivers:
             - filelog
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
@@ -354,15 +322,15 @@ spec:
           receivers:
             - filelog
           processors:
+            - memory_limiter
             - k8sattributes
             - attributes
-            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
             - batch
           exporters:
-            - otlp/{{ $teamName }}
+            - otlphttp/{{ $teamName }}
             # - logging
           {{- end }}
         {{- end }}
@@ -371,5 +339,5 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.daemonset.ports.prometheus.targetPort }}
+          address: 127.0.0.1:{{ .Values.daemonset.ports.prometheus.targetPort }}
 {{- end -}}
