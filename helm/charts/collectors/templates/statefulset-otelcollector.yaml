@@ -101,7 +101,7 @@
       If it's the opsteam, add the "kubernetes-nodes" job.
     */}}
     {{- if eq $teamName "opsteam" }}
-      {{ $baseFilterCondition = printf "'%s and (resource.attributes[\"service.name\"] != \"kubernetes-nodes\"))'" $baseFilterCondition }}
+      {{ $baseFilterCondition = printf "'%s and (resource.attributes[\"service.name\"] != \"kubernetes-nodes\")'" $baseFilterCondition }}
     {{- else }}
       {{ $baseFilterCondition = printf "'%s'" $baseFilterCondition }}
     {{- end }}
