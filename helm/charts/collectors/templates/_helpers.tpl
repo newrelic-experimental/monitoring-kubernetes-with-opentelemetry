@@ -115,6 +115,49 @@ Set name for kube-state-metrics service discovery.
 {{- end -}}
 {{- end -}}
 
+{{- define "deploymentTeamConfig" -}}
+{{/*
+  Depending on which config setting is used (global.enabled), create one "teams"
+  variable to loop over.
+*/}}
+{{- $teams := dict -}}
+{{- if .Values.global.newrelic.enabled -}}
+  {{- $teams = .Values.global.newrelic.teams -}}
+  {{/*
+    "global" setting does not have the endpoint field on every team info. In order to
+    loop without if/else cases, add the endpoint to every team info.
+  */}}
+  {{- range $teamName, $teamInfo := $teams -}}
+    {{- $_ := set $teamInfo "endpoint" $.Values.global.newrelic.endpoint -}}
+  {{- end -}}
+{{- else -}}
+  {{- $teams = .Values.deployment.newrelic.teams -}}
+{{- end -}}
+
+{{/*
+  Set the namespaced filtering conditions only if
+  - team is not marked as "ignore"
+  - team has namespaces defined
+*/}}
+{{- range $teamName, $teamInfo := $teams -}}
+  {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) -}}
+
+    {{- $conditionForK8sNamespaceName := "" -}}
+    {{- range $index, $namespace := $teamInfo.namespaces -}}
+      {{- if eq $index 0 -}}
+        {{- $conditionForK8sNamespaceName = printf "not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $namespace -}}
+      {{- else -}}
+        {{- $conditionForK8sNamespaceName = printf "%s and not (IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\"))" $conditionForK8sNamespaceName $namespace -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $_ := set $teamInfo "filter" $conditionForK8sNamespaceName -}}
+  {{- end }}
+{{- end }}
+
+{{- $teams | toYaml -}}
+{{- end -}}
+
 {{- define "statefulsetTeamConfig" -}}
 {{/*
   Depending on which config setting is used (global.enabled), create one "teams"
