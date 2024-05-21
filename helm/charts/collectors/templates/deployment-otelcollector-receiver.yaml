@@ -85,7 +85,7 @@ spec:
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ include "nrotel.statefulsetName" $ }}-{{ $teamName }}
+          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
           key: licenseKey
         {{- end }}
       {{- end }}
