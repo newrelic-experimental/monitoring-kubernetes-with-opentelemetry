@@ -131,14 +131,30 @@ deployment:
     # Can be used in combination with presets that create a cluster role to add additional rules.
     rules:
       - apiGroups:
-          - ""
+          - ''
         resources:
-          - pods
-          - namespaces
+          - 'pods'
+          - 'namespaces'
         verbs:
-          - get
-          - watch
-          - list
+          - 'get'
+          - 'watch'
+          - 'list'
+      - apiGroups:
+          - 'apps'
+        resources:
+          - 'replicasets'
+        verbs:
+          - 'get'
+          - 'list'
+          - 'watch'
+      - apiGroups:
+          - 'extensions'
+        resources:
+          - 'replicasets'
+        verbs:
+          - 'get'
+          - 'list'
+          - 'watch'
 
   clusterRoleBinding:
     # Annotations to add to the clusterRoleBinding
@@ -359,14 +375,30 @@ daemonset:
     # Can be used in combination with presets that create a cluster role to add additional rules.
     rules:
       - apiGroups:
-          - ""
+          - ''
         resources:
-          - pods
-          - namespaces
+          - 'pods'
+          - 'namespaces'
         verbs:
-          - get
-          - watch
-          - list
+          - 'get'
+          - 'watch'
+          - 'list'
+      - apiGroups:
+          - 'apps'
+        resources:
+          - 'replicasets'
+        verbs:
+          - 'get'
+          - 'list'
+          - 'watch'
+      - apiGroups:
+          - 'extensions'
+        resources:
+          - 'replicasets'
+        verbs:
+          - 'get'
+          - 'list'
+          - 'watch'
 
   clusterRoleBinding:
     # Annotations to add to the clusterRoleBinding
