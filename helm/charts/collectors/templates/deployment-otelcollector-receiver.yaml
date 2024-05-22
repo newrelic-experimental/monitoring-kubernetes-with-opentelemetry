@@ -1,4 +1,5 @@
 {{- if eq .Values.traces.enabled true -}}
+{{- $teams := include "deploymentTeamConfig" . | fromYaml }}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
@@ -70,28 +71,7 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
-  {{- if .Values.global.newrelic.enabled }}
-    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
-      {{- if ne $teamInfo.ignore true }}
-    - name: {{ $teamName }}-endpoint
-      value: {{ $.Values.global.newrelic.endpoint }}
-        {{- if $teamInfo.licenseKey.secretRef }}
-    - name: {{ $teamName }}-licenseKey
-      valueFrom:
-        secretKeyRef:
-          name: {{ $teamInfo.licenseKey.secretRef.name }}
-          key: {{ $teamInfo.licenseKey.secretRef.key }}
-        {{- else if $teamInfo.licenseKey.value }}
-    - name: {{ $teamName }}-licenseKey
-      valueFrom:
-        secretKeyRef:
-          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
-          key: licenseKey
-        {{- end }}
-      {{- end }}
-    {{- end }}
-  {{- else }}
-    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+    {{- range $teamName, $teamInfo := $teams }}
       {{- if ne $teamInfo.ignore true }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
@@ -110,7 +90,6 @@ spec:
         {{- end }}
       {{- end }}
     {{- end }}
-  {{- end }}
 
   # Otel configuration
   config: |
@@ -139,6 +118,7 @@ spec:
                   replacement: $1
                   action: keep
               {{- end }}
+
       otlp:
         protocols:
           grpc:
@@ -198,47 +178,22 @@ spec:
           - key: k8s.pod.name
             value: $MY_POD_NAME
             action: upsert
-      {{- if .Values.global.newrelic.enabled }}
-        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
-          {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
+
+      {{- range $teamName, $teamInfo := $teams }}
+        {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
       filter/{{ $teamName }}:
         error_mode: ignore
         metrics:
           datapoint:
-          {{ $conditionForK8sNamespaceName := "" -}}
-          {{- range $index, $namespace := $teamInfo.namespaces -}}
-            {{- if eq $index 0 -}}
-              {{- $conditionForK8sNamespaceName = printf "not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $namespace -}}
-            {{ else }}
-              {{- $conditionForK8sNamespaceName = printf "%s and not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $conditionForK8sNamespaceName $namespace -}}
-            {{- end -}}
-          {{- end -}}
-            - '{{ $conditionForK8sNamespaceName }}'
-          {{- end }}
-        {{- end }}
-      {{- else }}
-        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
-          {{- if and (ne $teamInfo.ignore true) (ne (len $teamInfo.namespaces) 0) }}
-      filter/{{ $teamName }}:
-        error_mode: ignore
-        metrics:
-          datapoint:
-          {{ $conditionForK8sNamespaceName := "" -}}
-          {{- range $index, $namespace := $teamInfo.namespaces -}}
-            {{- if eq $index 0 -}}
-              {{- $conditionForK8sNamespaceName = printf "not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $namespace -}}
-            {{ else }}
-              {{- $conditionForK8sNamespaceName = printf "%s and not IsMatch(resource.attributes[\"k8s.namespace.name\"], \"%s\")" $conditionForK8sNamespaceName $namespace -}}
-            {{- end -}}
-          {{- end -}}
-            - '{{ $conditionForK8sNamespaceName }}'
-          {{- end }}
+            - {{ $teamInfo.filter }}
         {{- end }}
       {{- end }}
+
       memory_limiter:
          check_interval: 1s
          limit_percentage: 80
          spike_limit_percentage: 25
+
       batch:
         send_batch_max_size: 1000
         timeout: 30s
@@ -253,8 +208,8 @@ spec:
         resolver:
           dns:
             hostname: "{{ include "nrotel.headlessServiceNameSampler" . }}"
-    {{- if .Values.global.newrelic.enabled }}
-      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+
+      {{- range $teamName, $teamInfo := $teams }}
         {{- if ne $teamInfo.ignore true }}
       otlphttp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
@@ -264,18 +219,7 @@ spec:
           api-key: ${env:{{ $teamName }}-licenseKey}
         {{- end }}
       {{- end }}
-    {{- else }}
-      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
-        {{- if ne $teamInfo.ignore true }}
-      otlphttp/{{ $teamName }}:
-        endpoint: ${env:{{ $teamName }}-endpoint}
-        tls:
-          insecure: false
-        headers:
-          api-key: ${env:{{ $teamName }}-licenseKey}
-        {{- end }}
-      {{- end }}
-    {{- end }}
+
       logging:
         verbosity: detailed
 
@@ -286,6 +230,7 @@ spec:
     service:
       extensions:
         - memory_ballast
+
       pipelines:
         metrics/self:
           receivers:
@@ -299,8 +244,8 @@ spec:
           exporters:
             - otlphttp/opsteam
             # - logging
-      {{- if .Values.global.newrelic.enabled }}
-        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+
+        {{- range $teamName, $teamInfo := $teams }}
           {{- if ne $teamInfo.ignore true }}
         metrics/{{ $teamName }}:
           receivers:
@@ -318,26 +263,7 @@ spec:
             # - logging
           {{- end }}
         {{- end }}
-      {{- else }}
-        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
-          {{- if ne $teamInfo.ignore true }}
-        metrics/{{ $teamName }}:
-          receivers:
-            - otlp
-          processors:
-            - memory_limiter
-            - k8sattributes
-            - attributes
-          {{- if ne (len $teamInfo.namespaces) 0 }}
-            - filter/{{ $teamName }}
-          {{- end }}
-            - batch
-          exporters:
-            - otlphttp/{{ $teamName }}
-            # - logging
-          {{- end }}
-        {{- end }}
-      {{- end }}
+
         traces:
           receivers:
             - otlp
@@ -349,6 +275,7 @@ spec:
           exporters:
             - loadbalancing
             # - logging
+
       telemetry:
         # logs:
         #   level: DEBUG
