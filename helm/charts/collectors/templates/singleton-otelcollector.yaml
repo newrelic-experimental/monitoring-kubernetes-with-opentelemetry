@@ -1,4 +1,4 @@
-{{- if eq .Values.events.enabled true -}}
+{{- if eq .Values.singleton.enabled true -}}
 {{- $teams := include "singletonTeamConfig" . | fromYaml }}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector

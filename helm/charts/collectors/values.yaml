@@ -6,20 +6,6 @@ nameOverride: null
 # Cluster name
 clusterName: ""
 
-### Flags ###
-# Logs
-logs:
-  enabled: true
-# Traces
-traces:
-  enabled: true
-# Metrics
-metrics:
-  enabled: true
-# Events
-events:
-  enabled: true
-
 ### GLOBAL CONFIG ###
 # Global config for ease of use to apply to all collector types.
 global:
@@ -102,6 +88,9 @@ global:
 
 # Both collectors can be scaled out/in independently from each other
 deployment:
+
+  # Flag to enable
+  enabled: true
 
   # Image
   image:
@@ -347,6 +336,9 @@ deployment:
 # applications running on the cluster.
 daemonset:
 
+  # Flag to enable
+  enabled: true
+
   # Image
   image:
     # Repository
@@ -587,6 +579,9 @@ daemonset:
 # This configuration is responsible for scraping the metrics from the
 # various endpoints within the cluster.
 statefulset:
+
+  # Flag to enable
+  enabled: true
 
   # Image
   image:
@@ -1011,6 +1006,9 @@ statefulset:
 # This configuration is responsible for scraping the events from the
 # Kube-API-Server.
 singleton:
+
+  # Flag to enable
+  enabled: true
 
   # Image
   image:

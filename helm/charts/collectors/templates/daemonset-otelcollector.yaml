@@ -1,4 +1,4 @@
-{{- if eq .Values.logs.enabled true -}}
+{{- if eq .Values.daemonset.enabled true -}}
 {{- $teams := include "daemonsetTeamConfig" . | fromYaml }}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector

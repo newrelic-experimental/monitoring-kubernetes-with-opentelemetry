@@ -52,10 +52,10 @@ if [[ $case == "02" ]]; then
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -81,11 +81,11 @@ if [[ $case == "03" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=true \
+    --set deployment.enabled=true \
     --set deployment.newrelic.teams=null \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -109,11 +109,11 @@ if [[ $case == "04" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
     --set daemonset.newrelic.teams=null \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -137,11 +137,11 @@ if [[ $case == "05" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
     --set statefulset.newrelic.teams=null \
-    --set events.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -165,10 +165,10 @@ if [[ $case == "06" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     --set singleton.newrelic.teams=null \
     "../../charts/collectors" \
     2>&1)
@@ -196,10 +196,10 @@ if [[ $case == "07" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="INVALID_ENDPOINT" \
-    --set traces.enabled=true \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=true \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -224,10 +224,10 @@ if [[ $case == "08" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="INVALID_ENDPOINT" \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -252,10 +252,10 @@ if [[ $case == "09" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="INVALID_ENDPOINT" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -280,10 +280,10 @@ if [[ $case == "10" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="INVALID_ENDPOINT" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     "../../charts/collectors" \
     2>&1)
 
@@ -309,11 +309,11 @@ if [[ $case == "11" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=true \
+    --set deployment.enabled=true \
     --set deployment.newrelic.teams.opsteam.endpoint="INVALID_ENDPOINT" \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -337,11 +337,11 @@ if [[ $case == "12" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
     --set daemonset.newrelic.teams.opsteam.endpoint="INVALID_ENDPOINT" \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -365,11 +365,11 @@ if [[ $case == "13" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
     --set statefulset.newrelic.teams.opsteam.endpoint="INVALID_ENDPOINT" \
-    --set events.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -393,10 +393,10 @@ if [[ $case == "14" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     --set singleton.newrelic.teams.opsteam.endpoint="INVALID_ENDPOINT" \
     "../../charts/collectors" \
     2>&1)
@@ -424,10 +424,10 @@ if [[ $case == "15" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
-    --set traces.enabled=true \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=true \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -452,10 +452,10 @@ if [[ $case == "16" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -480,11 +480,11 @@ if [[ $case == "17" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
     --set statefulset.newrelic.opsteam.endpoint="https://otlp.nr-data.net" \
-    --set events.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -509,10 +509,10 @@ if [[ $case == "18" ]]; then
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     --set singleton.newrelic.opsteam.endpoint="https://otlp.nr-data.net" \
     "../../charts/collectors" \
     2>&1)
@@ -539,11 +539,11 @@ if [[ $case == "19" ]]; then
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=true \
+    --set deployment.enabled=true \
     --set deployment.newrelic.opsteam.endpoint="https://otlp.nr-data.net" \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -566,11 +566,11 @@ if [[ $case == "20" ]]; then
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
     --set daemonset.newrelic.opsteam.endpoint="https://otlp.nr-data.net" \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -593,11 +593,11 @@ if [[ $case == "21" ]]; then
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
     --set statefulset.newrelic.opsteam.endpoint="https://otlp.nr-data.net" \
-    --set events.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -620,10 +620,10 @@ if [[ $case == "22" ]]; then
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     --set singleton.newrelic.opsteam.endpoint="https://otlp.nr-data.net" \
     "../../charts/collectors" \
     2>&1)
@@ -652,10 +652,10 @@ if [[ $case == "23" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
-    --set traces.enabled=true \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=true \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -681,10 +681,10 @@ if [[ $case == "24" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -710,10 +710,10 @@ if [[ $case == "25" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -739,10 +739,10 @@ if [[ $case == "26" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     "../../charts/collectors" \
     2>&1)
 
@@ -768,12 +768,12 @@ if [[ $case == "27" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=true \
+    --set deployment.enabled=true \
     --set deployment.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set deployment.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -797,12 +797,12 @@ if [[ $case == "28" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
     --set daemonset.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set daemonset.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -826,12 +826,12 @@ if [[ $case == "29" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
     --set statefulset.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set statefulset.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
-    --set events.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -855,10 +855,10 @@ if [[ $case == "30" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     --set singleton.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set singleton.newrelic.teams.opsteam.licenseKey.secretRef.key="key" \
     "../../charts/collectors" \
@@ -888,10 +888,10 @@ if [[ $case == "31" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
-    --set traces.enabled=true \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=true \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -917,10 +917,10 @@ if [[ $case == "32" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -946,10 +946,10 @@ if [[ $case == "33" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
-    --set events.enabled=false \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -975,10 +975,10 @@ if [[ $case == "34" ]]; then
     --set global.newrelic.enabled=true \
     --set global.newrelic.endpoint="https://otlp.nr-data.net" \
     --set global.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     "../../charts/collectors" \
     2>&1)
 
@@ -1004,12 +1004,12 @@ if [[ $case == "35" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=true \
+    --set deployment.enabled=true \
     --set deployment.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set deployment.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -1033,12 +1033,12 @@ if [[ $case == "36" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=true \
     --set daemonset.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set daemonset.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
-    --set metrics.enabled=false \
-    --set events.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -1062,12 +1062,12 @@ if [[ $case == "37" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=true \
     --set statefulset.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set statefulset.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
-    --set events.enabled=false \
+    --set singleton.enabled=false \
     "../../charts/collectors" \
     2>&1)
 
@@ -1091,10 +1091,10 @@ if [[ $case == "38" ]]; then
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
     --set global.newrelic.enabled=false \
-    --set traces.enabled=false \
-    --set logs.enabled=false \
-    --set metrics.enabled=false \
-    --set events.enabled=true \
+    --set deployment.enabled=false \
+    --set daemonset.enabled=false \
+    --set statefulset.enabled=false \
+    --set singleton.enabled=true \
     --set singleton.newrelic.teams.opsteam.endpoint="https://otlp.nr-data.net" \
     --set singleton.newrelic.teams.opsteam.licenseKey.secretRef.name="name" \
     "../../charts/collectors" \
