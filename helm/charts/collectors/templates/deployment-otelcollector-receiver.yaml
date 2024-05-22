@@ -186,6 +186,9 @@ spec:
         metrics:
           datapoint:
             - {{ $teamInfo.filter }}
+        logs:
+          log_record:
+            - {{ $teamInfo.filter }}
         {{- end }}
       {{- end }}
 
@@ -275,6 +278,25 @@ spec:
           exporters:
             - loadbalancing
             # - logging
+
+        {{- range $teamName, $teamInfo := $teams }}
+          {{- if ne $teamInfo.ignore true }}
+        logs/{{ $teamName }}:
+          receivers:
+            - otlp
+          processors:
+            - memory_limiter
+            - k8sattributes
+            - attributes
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+            - batch
+          exporters:
+            - otlphttp/{{ $teamName }}
+            # - logging
+          {{- end }}
+        {{- end }}
 
       telemetry:
         # logs:
