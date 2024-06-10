@@ -1,6 +1,6 @@
 {{- if eq .Values.statefulset.enabled true -}}
 {{- $teams := include "statefulsetTeamConfig" . | fromYaml }}
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: {{ include "nrotel.statefulsetName" . }}
@@ -82,16 +82,16 @@ spec:
           fieldPath: metadata.namespace
     {{- range $teamName, $teamInfo := $teams }}
       {{- if ne $teamInfo.ignore true }}
-    - name: {{ $teamName }}-endpoint
+    - name: {{ $teamName }}_endpoint
       value: {{ $teamInfo.endpoint }}
         {{- if $teamInfo.licenseKey.secretRef }}
-    - name: {{ $teamName }}-licenseKey
+    - name: {{ $teamName }}_licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ $teamInfo.licenseKey.secretRef.name }}
           key: {{ $teamInfo.licenseKey.secretRef.key }}
         {{- else if $teamInfo.licenseKey.value }}
-    - name: {{ $teamName }}-licenseKey
+    - name: {{ $teamName }}_licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ include "nrotel.statefulsetName" $ }}-{{ $teamName }}
@@ -101,7 +101,7 @@ spec:
     {{- end }}
 
   # Otel configuration
-  config: |
+  config:
     receivers:
       prometheus/self:
         config:
@@ -626,16 +626,16 @@ spec:
       {{- range $teamName, $teamInfo := $teams }}
         {{- if ne $teamInfo.ignore true }}
       otlphttp/{{ $teamName }}:
-        endpoint: ${env:{{ $teamName }}-endpoint}
+        endpoint: ${{ $teamName }}_endpoint
         tls:
           insecure: false
         headers:
-          api-key: ${env:{{ $teamName }}-licenseKey}
+          api-key: ${{ $teamName }}_licenseKey
         {{- end }}
       {{- end }}
 
       logging:
-        # verbosity: detailed
+        verbosity: detailed
 
     extensions:
       memory_ballast:
