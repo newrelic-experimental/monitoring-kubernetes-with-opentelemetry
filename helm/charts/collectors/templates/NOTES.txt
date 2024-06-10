@@ -60,7 +60,7 @@
       {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
     {{- end -}}
   {{- end }}
-Traces are enabled. Deployments of OTel collectors are deployed.
+Deployment mode is enabled. Deployments of OTel collectors are deployed.
 {{- end -}}
 {{ if .Values.daemonset.enabled -}}
   {{- if and (not .Values.global.newrelic.enabled) (not .Values.daemonset.newrelic.teams) -}}
@@ -115,7 +115,7 @@ Traces are enabled. Deployments of OTel collectors are deployed.
       {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
     {{- end -}}
   {{- end }}
-Logs are enabled. Daemonset of OTel collectors are deployed.
+Daemonset mode is enabled. Daemonset of OTel collectors are deployed.
 {{- end -}}
 {{ if .Values.statefulset.enabled }}
   {{- if and (not .Values.global.newrelic.enabled) (not .Values.statefulset.newrelic.teams) -}}
@@ -170,7 +170,7 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
       {{ fail "ERROR [DEPLOYMENT]: The 'opsteam' is mandatory but not defined!" }}
     {{- end -}}
   {{- end }}
-Metrics are enabled. Statefulset of OTel collectors are deployed.
+Statefulset mode is enabled. Statefulset of OTel collectors are deployed.
 {{- end }}
 {{ if .Values.singleton.enabled -}}
   {{- if and (not .Values.global.newrelic.enabled) (not .Values.singleton.newrelic.teams) -}}
@@ -211,6 +211,6 @@ Metrics are enabled. Statefulset of OTel collectors are deployed.
       {{- end -}}
     {{- end }}
   {{- end }}
-Events are enabled. Singleton of OTel collector is deployed.
+Singleton mode is enabled. Singleton of OTel collector is deployed.
 {{- end -}}
 #######################################
