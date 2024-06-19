@@ -110,7 +110,7 @@ spec:
                   action: keep
               {{- end }}
 
-      k8s_events:
+      k8s_events: {}
 
     processors:
       k8sattributes:
@@ -215,19 +215,23 @@ spec:
             - otlphttp/opsteam
             # - logging
 
-        # filterprocessor is at the moment incapable of properly filtering
-        # k8seventreceiver logs. Therefore, send all events only to opsteam
-        # without filtering till it's fixed.
-        logs/opsteam:
+        {{- range $teamName, $teamInfo := $teams }}
+          {{- if ne $teamInfo.ignore true }}
+        logs/{{ $teamName }}:
           receivers:
             - k8s_events
           processors:
             - memory_limiter
             - attributes
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
             - batch
           exporters:
-            - otlphttp/opsteam
+            - otlphttp/{{ $teamName }}
             # - logging
+          {{- end }}
+        {{- end }}
 
       telemetry:
         # logs:
