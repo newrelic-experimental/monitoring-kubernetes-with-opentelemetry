@@ -254,3 +254,180 @@ helm upgrade ... \
 ```
 
 Along with the [Terraform deployment](./monitoring/), a [data ingest](./monitoring/terraform/04_dashboard_data_ingest.tf) dashboard is created for you to keep track of which services is causing how much data ingest.
+
+## Flux deployment with Flux CD version v0.38.3
+
+Alternatively, if you are using [Flux CD](https://fluxcd.io/) for GitOps to deploy on Kubernetes, you can use the following manifests/yaml files to rollout nrotelk8s.
+
+Since HelmReleases and HelmRepositories are namespaced objects, first you need to create a namespace:
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opentelemetry
+```
+
+In order to rollout helmcharts with Flux, you need to define a [HelmRepository](https://fluxcd.io/flux/guides/helmreleases/#helm-repository)where the HelmCharts of opentelemetry reside, and then define a HelmRelease resource. The [HelmRelease](https://fluxcd.io/flux/guides/helmreleases/#define-a-helm-release) resource contains the configuration for the Helm Values (the values.yaml). Flux reconciles these Git files at certain intervals and then tries to execute a "helm upgrade" with the potentially changed values.
+
+### Rolling out opentelemtry
+
+With spec.dependsOn, dependencies can be defined. For example, here the opentelemetry HelmRelease checks if the kube-prometheus-stack HelmRelease is deployed in the monitoring namespace (which is a prerequisite for opentelemetry):
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: opentelemetry-helmrepo
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  url: https://open-telemetry.github.io/opentelemetry-helm-charts
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: oteloperator
+  namespace: opentelemetry
+spec:
+  chart:
+    spec:
+      chart: opentelemetry-operator
+      sourceRef:
+        kind: HelmRepository
+        name: opentelemetry-helmrepo
+        namespace: flux-system
+      version: 0.40.0
+  interval: 10m0s
+  dependsOn:
+    - name: kube-prometheus-stack
+      namespace: monitoring
+  values: 
+    nameOverride: oteloperator
+```
+
+### Rolling out nrotelk8s
+
+Similar to the rollout of opentelemetry, a HelmRepository and a HelmRelease resource must be defined. Here is an example for nrotelk8s with externally installed node-exporter and kube-state-metrics, and 2 different teams (opsteam and devteam1):
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: otelcollectors-helmrepo
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  url: https://newrelic-experimental.github.io/monitoring-kubernetes-with-opentelemetry/charts
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nr-experimental-otelcollectors
+  namespace: opentelemetry
+spec:
+  chart:
+    spec:
+      chart: nrotelk8s
+      sourceRef:
+        kind: HelmRepository
+        name: otelcollectors-helmrepo
+        namespace: flux-system
+      version: 0.3.0
+  interval: 10m0s
+  releaseName: nr-experimental-otelcollectors
+  dependsOn:
+    - name: oteloperator
+      namespace: opentelemetry
+  values:
+    nameOverride: nr-otel
+    clusterName: aks-clustername
+    traces:
+      enabled: true
+    deployment:
+      ports:
+        prometheus:
+          port: 8888
+      prometheus:
+        importantMetricsOnly: true
+        lowDataMode: true
+    logs:
+      enabled: true
+    metrics:
+      enabled: true
+    events:
+      enabled: true
+    daemonset:
+      ports:
+        prometheus:
+          port: 8888
+      prometheus:
+        importantMetricsOnly: true
+        lowDataMode: true
+    statefulset:
+      replicas: "3"
+      prometheus:
+        lowDataMode: true
+        importantMetricsOnly: true
+        kubeStateMetrics:
+          enabled: false
+          serviceNameRef: kube-prometheus-stack-kube-state-metrics
+        nodeExporter:
+          enabled: false
+          serviceNameRef: kube-prometheus-stack-prometheus-node-exporter
+      ports:
+        prometheus:
+          port: 8888
+    global:
+      newrelic:
+        enabled: true
+        endpoint: otlp.eu01.nr-data.net:4317
+        teams:
+          opsteam:
+            licenseKey:
+              secretRef:
+                name: otel-monitoring-keys
+                key: opsteam-shared-ingest-key
+            namespaces:
+            - kube-system
+            - flux-system
+            - monitoring
+            - opentelemetry
+            - ingress*
+            - default
+            - zookeeper
+          devteam1:
+            licenseKey:
+              secretRef:
+                name: otel-monitoring-keys
+                key: devteam1-ingest-key
+            namespaces:
+            - .*devteam1*
+```
+
+Alternatively, one can write a Bash script in a cron job that creates the values file as a ConfigMap based on a label on the namespaces, such as "team-name: devteam1". This allows for automation in a dynamic cluster where teams frequently get installed or deleted:
+
+```yaml
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nr-experimental-otelcollectors
+  namespace: opentelemetry
+spec:
+  chart:
+    spec:
+      chart: nrotelk8s
+      sourceRef:
+        kind: HelmRepository
+        name: otelcollectors-helmrepo
+        namespace: flux-system
+      version: 0.3.0
+  interval: 10m0s
+  releaseName: nr-experimental-otelcollectors
+  dependsOn:
+    - name: oteloperator
+      namespace: opentelemetry
+  valuesFrom:
+  - kind: ConfigMap
+    name: cm-otel-values
+    valuesKey: values.yaml # This is the default, but best to be explicit for clarity
+```
