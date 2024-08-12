@@ -203,6 +203,21 @@ deployment:
       # Target MEM utilization to keep amongst the replicas
       targetMemoryUtilization: 70
 
+  # Receiver pipeline flags
+  receiverPipeline:
+    # Metrics
+    metrics:
+      # Flag to enable
+      enabled: true
+    # Traces
+    traces:
+      # Flag to enable
+      enabled: true
+    # Logs
+    logs:
+      # Flag to enable
+      enabled: true
+
   # Specific Prometheus configuration
   prometheus:
     # Receiver collectors

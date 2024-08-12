@@ -480,7 +480,7 @@ runTests() {
     exit 1
   fi
 
-  # Pipeline filter processor for devteam2 should be configured - receiver
+  # Pipeline filter processor for devteam2 should not be configured - receiver
   collectorDeploymentReceiverDevteam2PipelineProcessorFilterConfigCheck=$(echo "$helmTemplate" | yq 'select((.kind == "OpenTelemetryCollector") and (.metadata.name == "'${collectorDeploymentReceiverName}'")).spec.config' | yq '.service.pipelines.metrics/devteam2.processors[]' | yq 'select("filter/devteam2")')
   if [[ $collectorDeploymentReceiverDevteam2PipelineProcessorFilterConfigCheck != "" ]]; then
     echo "Mode: receiver"

@@ -248,8 +248,9 @@ spec:
             - otlphttp/opsteam
             # - logging
 
-        {{- range $teamName, $teamInfo := $teams }}
-          {{- if ne $teamInfo.ignore true }}
+        {{- if eq .Values.deployment.receiverPipeline.metrics.enabled true }}
+          {{- range $teamName, $teamInfo := $teams }}
+            {{- if ne $teamInfo.ignore true }}
         metrics/{{ $teamName }}:
           receivers:
             - otlp
@@ -264,9 +265,11 @@ spec:
           exporters:
             - otlphttp/{{ $teamName }}
             # - logging
+            {{- end }}
           {{- end }}
         {{- end }}
 
+        {{- if eq .Values.deployment.receiverPipeline.traces.enabled true }}
         traces:
           receivers:
             - otlp
@@ -278,9 +281,11 @@ spec:
           exporters:
             - loadbalancing
             # - logging
+        {{- end }}
 
-        {{- range $teamName, $teamInfo := $teams }}
-          {{- if ne $teamInfo.ignore true }}
+        {{- if eq .Values.deployment.receiverPipeline.logs.enabled true }}
+          {{- range $teamName, $teamInfo := $teams }}
+            {{- if ne $teamInfo.ignore true }}
         logs/{{ $teamName }}:
           receivers:
             - otlp
@@ -295,6 +300,7 @@ spec:
           exporters:
             - otlphttp/{{ $teamName }}
             # - logging
+            {{- end }}
           {{- end }}
         {{- end }}
 
