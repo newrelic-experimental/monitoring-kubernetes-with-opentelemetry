@@ -139,11 +139,11 @@ The following tests are implemented to be triggered by the Github workflow on [`
 
 The expected outcome is as follows:
 
-| Operation                                         | `opsteam` | `devteam1` | `devteam2` |
-| ------------------------------------------------- | --------- | ---------- | ---------- |
-| Secret creation                                   | ✅        | ✅         | ❌         |
-| Collector secret environment variables assignment | ✅        | ✅         | ❌         |
-| Collector processors configuration                | ❌        | ✅         | ❌         |
-| Collector exporter configuration                  | ✅        | ✅         | ❌         |
-| Collector pipeline configuration - processor      | ❌        | ✅         | ❌         |
-| Collector pipeline configuration - exporter       | ✅        | ✅         | ❌         |
+| Operation                                          | `opsteam` | `devteam1` | `devteam2` |
+| -------------------------------------------------- | --------- | ---------- | ---------- |
+| Secret creation                                    | ✅        | ✅         | ❌         |
+| Collector secret environment variables assignment  | ✅        | ✅         | ❌         |
+| Collector filterprocessor configuration            | ❌        | ✅         | ❌         |
+| Collector exporter configuration                   | ✅        | ✅         | ❌         |
+| Collector pipeline configuration - filterprocessor | ❌        | ✅         | ❌         |
+| Collector pipeline configuration - exporter        | ✅        | ✅         | ❌         |
