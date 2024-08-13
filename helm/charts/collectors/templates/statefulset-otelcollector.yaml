@@ -124,7 +124,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
       prometheus:
@@ -159,7 +159,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
 
@@ -214,7 +214,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
 
@@ -271,7 +271,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
 
@@ -328,7 +328,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
 
@@ -385,7 +385,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
 
@@ -449,7 +449,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
             {{- end }}
@@ -504,7 +504,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
 
