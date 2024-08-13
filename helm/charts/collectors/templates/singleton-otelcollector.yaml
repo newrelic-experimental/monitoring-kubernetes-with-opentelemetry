@@ -106,7 +106,7 @@ spec:
                 - source_labels: [__name__]
                   separator: ;
                   regex: {{ $metrics }}
-                  replacement: $1
+                  replacement: $$1
                   action: keep
               {{- end }}
 
