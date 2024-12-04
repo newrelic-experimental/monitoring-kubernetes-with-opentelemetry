@@ -6,9 +6,9 @@ metadata:
   name: {{ include "nrotel.statefulsetName" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-
   # Mode
   mode: "statefulset"
+  managementState: managed
 
   # Service Account
   serviceAccount: {{ include "nrotel.statefulsetName" . }}
