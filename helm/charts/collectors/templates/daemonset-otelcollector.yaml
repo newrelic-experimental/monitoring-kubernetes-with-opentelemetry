@@ -6,9 +6,9 @@ metadata:
   name: {{ include "nrotel.daemonsetName" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-
   # Mode
   mode: "daemonset"
+  managementState: managed
 
   # Service Account
   serviceAccount: {{ include "nrotel.daemonsetName" . }}

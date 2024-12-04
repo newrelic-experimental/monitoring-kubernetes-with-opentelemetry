@@ -6,9 +6,10 @@ metadata:
   name: {{ include "nrotel.singletonName" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-
   # Mode
   mode: "deployment"
+  managementState: managed
+
 
   # Replicas -> SHOULD BE 1 (obviously...)
   replicas: 1

@@ -6,9 +6,9 @@ metadata:
   name: {{ include "nrotel.deploymentNameReceiver" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-
   # Mode
   mode: "deployment"
+  managementState: managed
 
   # Service Account
   serviceAccount: {{ include "nrotel.deploymentName" . }}
