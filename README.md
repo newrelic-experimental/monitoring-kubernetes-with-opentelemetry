@@ -1,5 +1,9 @@
 <a href="https://opensource.newrelic.com/oss-category/#new-relic-experimental"><picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/newrelic/opensource-website/raw/main/src/images/categories/dark/Experimental.png"><source media="(prefers-color-scheme: light)" srcset="https://github.com/newrelic/opensource-website/raw/main/src/images/categories/Experimental.png"><img alt="New Relic Open Source experimental project banner." src="https://github.com/newrelic/opensource-website/raw/main/src/images/categories/Experimental.png"></picture></a>
 
+<table>
+  <tr><td><strong>Please be aware:</strong> maintenance on this repository has been suspended, and it will be moving into Archived state in the coming months. The capabilities included here are either currently available or will be  incorporated into the New Relic K8s instrumentation & experience. Please submit any enhancement requests intended for this repository to the <a href="https://github.com/newrelic/helm-charts/tree/master/charts/nr-k8s-otel-collector">nr-k8s-otel-collector repository</a>.</td></tr>
+</table>
+
 # Monitoring Kubernetes with Open Telemetry
 
 This repository is dedicated to provide a quick start to monitor you Kubernetes cluster. It is designed to be as scalable as possible with the further functionality of exporting necessary telemetry data to multiple New Relic accounts. If want to know where the repo is headed, check out the [issues](https://github.com/newrelic-experimental/monitoring-kubernetes-with-opentelemetry/issues) and the [roadmap](https://github.com/orgs/newrelic-experimental/projects/12/views/1)!
